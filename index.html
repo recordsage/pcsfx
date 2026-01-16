@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCS Fx</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .header {
+            background: rgba(0,0,0,0.3);
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #f97316, #fb923c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header .subtitle {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .main-container {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+
+        /* Effects Panel */
+        .effects-panel {
+            width: 280px;
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .effects-panel h2 {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .effect-btn {
+            width: 100%;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .effect-btn:hover:not(:disabled) {
+            background: rgba(249, 115, 22, 0.2);
+            border-color: #f97316;
+        }
+
+        .effect-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Image Display Area */
+        .image-area {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .images-row {
+            display: flex;
+            gap: 30px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .image-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .image-box-header {
+            padding: 12px 16px;
+            background: rgba(0,0,0,0.2);
+            font-weight: 600;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .image-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            min-height: 0;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .placeholder {
+            color: #666;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .placeholder-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,255,255,0.2);
+            border-top-color: #f97316;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Action Buttons */
+        .actions-row {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            padding: 10px 0;
+        }
+
+        .action-btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: #fff;
+        }
+
+        .action-btn.primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(249, 115, 22, 0.4);
+        }
+
+        .action-btn.secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .action-btn.secondary:hover:not(:disabled) {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* API Key Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 16px;
+            max-width: 450px;
+            width: 90%;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .modal h2 {
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .modal p {
+            color: #94a3b8;
+            margin-bottom: 20px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .modal input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .modal input:focus {
+            outline: none;
+            border-color: #f97316;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: #f97316;
+            background: rgba(249, 115, 22, 0.1);
+        }
+
+        .drop-zone input {
+            display: none;
+        }
+
+        /* Settings button */
+        .settings-btn {
+            margin-left: auto;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #888;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .settings-btn:hover {
+            border-color: #f97316;
+            color: #f97316;
+        }
+    </style>
+</head>
+<body>
+    <!-- API Key Modal -->
+    <div id="apiKeyModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h2>🔑 Enter API Key</h2>
+            <p>Enter your Google Gemini API key to use PCS Fx. Your key is stored locally in your browser and never sent anywhere except to Google's API.</p>
+            <input type="password" id="apiKeyInput" placeholder="Paste your API key here...">
+            <div class="modal-actions">
+                <button class="action-btn primary" onclick="saveApiKey()">Save & Continue</button>
+            </div>
+        </div>
+    </div>
+
+    <header class="header">
+        <h1>🎨 PCS Fx</h1>
+        <span class="subtitle">AI Image Effects</span>
+        <button class="settings-btn" onclick="showApiKeyModal()">⚙️ API Key</button>
+    </header>
+
+    <div class="main-container">
+        <!-- Effects Panel -->
+        <div class="effects-panel">
+            <h2>Choose an Effect</h2>
+            <div id="effectButtons"></div>
+        </div>
+
+        <!-- Image Display Area -->
+        <div class="image-area">
+            <div class="images-row">
+                <!-- Original Image -->
+                <div class="image-box">
+                    <div class="image-box-header">Original</div>
+                    <div class="image-container" id="originalContainer">
+                        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                            <div class="placeholder-icon">📷</div>
+                            <p>Click to select or drag & drop an image</p>
+                            <p style="font-size: 12px; color: #555; margin-top: 8px;">You can also paste from clipboard (Ctrl+V)</p>
+                            <input type="file" id="fileInput" accept="image/*">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Result Image -->
+                <div class="image-box">
+                    <div class="image-box-header">Result</div>
+                    <div class="image-container" id="resultContainer">
+                        <div class="placeholder">
+                            <div class="placeholder-icon">✨</div>
+                            <p>Select an effect to generate</p>
+                        </div>
+                        <div class="loading-overlay hidden" id="loadingOverlay">
+                            <div class="spinner"></div>
+                            <span>Generating...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="actions-row">
+                <button class="action-btn secondary" onclick="loadNewImage()">📁 Load New Image</button>
+                <button class="action-btn secondary" id="swapBtn" onclick="swapImages()" disabled>🔄 Swap Result → Original</button>
+                <button class="action-btn primary" id="saveBtn" onclick="saveImage()" disabled>💾 Save Image</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============ CONFIGURATION ============
+        const API_MODEL = 'gemini-3-pro-image-preview';
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${API_MODEL}:generateContent`;
+
+        // Effects definitions
+        const EFFECTS = [
+            {
+                name: 'Pencil Sketch',
+                prompt: 'Transform this image into a detailed graphite pencil sketch.'
+            },
+            {
+                name: 'Watercolor',
+                prompt: 'Transform this image using traditional wet-on-wet watercolor technique with soft pigment diffusion and natural color bleeding. Edges should be soft and organic, avoiding hard outlines except where the focal subject requires gentle definition. Apply layered translucent washes, gradually building depth on cold-press watercolor paper with subtle grain. Colors should be slightly desaturated, harmonious, and blended smoothly. Preserve the subject\'s essential form but simplify fine details into expressive brush shapes. Lighting should feel diffuse. Background should dissolve into loose, abstract washes. Overall aesthetic: elegant, calm, painterly, and timeless.'
+            },
+            {
+                name: 'Pop Art',
+                prompt: 'Transform this image into a vibrant Pop Art style illustration inspired by Andy Warhol and Roy Lichtenstein. Use bold, saturated, high-contrast colors (primary reds, yellows, blues), thick black outlines, and comic-book style Ben-Day dots for shading. Simplify details into strong, flat graphical shapes to create a retro, mass-media aesthetic.'
+            },
+            {
+                name: 'Stone Sculpture',
+                prompt: 'Transform the subject of this image so it appears to be masterfully carved into solid stone, as if sculpted by a world-class artisan. Preserve the subject\'s exact proportions, contours, and defining details with high fidelity. Material: Hyper-realistic stone surface with visible chisel marks, micro-fractures, erosion, and weathering. Natural imperfections like tiny cracks and worn edges. Matte finish. Lighting: Dramatic cinematic lighting, low-angle raking light to accentuate depth and relief. Soft ambient fill. Mood: Epic, timeless, museum-quality. Color: Natural stone palette (cool grays, warm limestone tones). Quality: Ultra-high resolution, photorealistic, no cartoon or painterly effects. Looks like a real stone sculpture photographed with a cinema camera.'
+            },
+            {
+                name: 'Grayscale',
+                prompt: 'Apply a grayscale filter to this image.'
+            },
+            {
+                name: 'Smart Background',
+                prompt: 'Analyze the main foreground elements (people, objects, logos, etc.) and their current environment. Replace the background with a completely new, high-quality setting that complements the subject\'s style. If the foreground is a person, consider themes that match their attire or vibe. If it is an object or logo, choose a clean, professional, or thematic background that highlights it effectively. Alternatively, upgrade the current location to a "parallel universe" version (e.g., a messy room becomes a luxury apartment). Keep the foreground elements visually unchanged but blend them realistically into the new background.'
+            }
+        ];
+
+        // ============ STATE ============
+        let originalImageData = null;  // Base64 data of original image
+        let originalMimeType = null;
+        let resultImageData = null;    // Base64 data of result image
+        let isProcessing = false;
+        let saveCounter = 1;
+
+        // ============ INITIALIZATION ============
+        document.addEventListener('DOMContentLoaded', () => {
+            initEffectButtons();
+            initDragDrop();
+            initPasteHandler();
+            checkApiKey();
+        });
+
+        function initEffectButtons() {
+            const container = document.getElementById('effectButtons');
+            EFFECTS.forEach((effect, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'effect-btn';
+                btn.textContent = effect.name;
+                btn.disabled = true;
+                btn.onclick = () => applyEffect(index);
+                btn.id = `effect-${index}`;
+                container.appendChild(btn);
+            });
+        }
+
+        function initDragDrop() {
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'));
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'));
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                const files = e.dataTransfer.files;
+                if (files.length > 0) handleFile(files[0]);
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) handleFile(e.target.files[0]);
+            });
+        }
+
+        function initPasteHandler() {
+            document.addEventListener('paste', (e) => {
+                const items = e.clipboardData.items;
+                for (let item of items) {
+                    if (item.type.startsWith('image/')) {
+                        const file = item.getAsFile();
+                        handleFile(file);
+                        break;
+                    }
+                }
+            });
+        }
+
+        // ============ API KEY MANAGEMENT ============
+        function checkApiKey() {
+            const key = localStorage.getItem('pcsfx_api_key');
+            if (!key) {
+                showApiKeyModal();
+            }
+        }
+
+        function showApiKeyModal() {
+            document.getElementById('apiKeyModal').classList.remove('hidden');
+            document.getElementById('apiKeyInput').value = localStorage.getItem('pcsfx_api_key') || '';
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            if (key) {
+                localStorage.setItem('pcsfx_api_key', key);
+                document.getElementById('apiKeyModal').classList.add('hidden');
+            } else {
+                alert('Please enter a valid API key');
+            }
+        }
+
+        function getApiKey() {
+            return localStorage.getItem('pcsfx_api_key');
+        }
+
+        // ============ IMAGE HANDLING ============
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const dataUrl = e.target.result;
+                originalMimeType = file.type;
+                originalImageData = dataUrl.split(',')[1]; // Remove data:image/xxx;base64, prefix
+                displayOriginalImage(dataUrl);
+                enableEffectButtons();
+                clearResult();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function displayOriginalImage(dataUrl) {
+            const container = document.getElementById('originalContainer');
+            container.innerHTML = `<img src="${dataUrl}" alt="Original image">`;
+        }
+
+        function displayResultImage(base64Data, mimeType) {
+            const dataUrl = `data:${mimeType};base64,${base64Data}`;
+            const container = document.getElementById('resultContainer');
+            
+            // Keep the loading overlay element
+            container.innerHTML = `
+                <img src="${dataUrl}" alt="Result image">
+                <div class="loading-overlay hidden" id="loadingOverlay">
+                    <div class="spinner"></div>
+                    <span>Generating...</span>
+                </div>
+            `;
+            
+            resultImageData = base64Data;
+            document.getElementById('saveBtn').disabled = false;
+            document.getElementById('swapBtn').disabled = false;
+        }
+
+        function clearResult() {
+            const container = document.getElementById('resultContainer');
+            container.innerHTML = `
+                <div class="placeholder">
+                    <div class="placeholder-icon">✨</div>
+                    <p>Select an effect to generate</p>
+                </div>
+                <div class="loading-overlay hidden" id="loadingOverlay">
+                    <div class="spinner"></div>
+                    <span>Generating...</span>
+                </div>
+            `;
+            resultImageData = null;
+            document.getElementById('saveBtn').disabled = true;
+            document.getElementById('swapBtn').disabled = true;
+        }
+
+        function enableEffectButtons() {
+            EFFECTS.forEach((_, index) => {
+                document.getElementById(`effect-${index}`).disabled = false;
+            });
+        }
+
+        function disableEffectButtons() {
+            EFFECTS.forEach((_, index) => {
+                document.getElementById(`effect-${index}`).disabled = true;
+            });
+        }
+
+        // ============ API INTERACTION ============
+        async function applyEffect(effectIndex) {
+            if (isProcessing || !originalImageData) return;
+
+            const apiKey = getApiKey();
+            if (!apiKey) {
+                showApiKeyModal();
+                return;
+            }
+
+            const effect = EFFECTS[effectIndex];
+            isProcessing = true;
+            
+            // Show loading state
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            disableEffectButtons();
+
+            try {
+                const response = await fetch(`${API_URL}?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                { text: effect.prompt },
+                                {
+                                    inline_data: {
+                                        mime_type: originalMimeType,
+                                        data: originalImageData
+                                    }
+                                }
+                            ]
+                        }],
+                        generationConfig: {
+                            responseModalities: ['TEXT', 'IMAGE']
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error?.message || `API Error: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Find the image part in the response
+                let imageFound = false;
+                if (data.candidates && data.candidates[0]?.content?.parts) {
+                    for (const part of data.candidates[0].content.parts) {
+                        if (part.inlineData) {
+                            displayResultImage(part.inlineData.data, part.inlineData.mimeType);
+                            imageFound = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!imageFound) {
+                    throw new Error('No image returned from API');
+                }
+
+            } catch (error) {
+                console.error('Effect error:', error);
+                alert(`Error: ${error.message}`);
+                clearResult();
+            } finally {
+                isProcessing = false;
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                if (originalImageData) enableEffectButtons();
+            }
+        }
+
+        // ============ ACTIONS ============
+        function loadNewImage() {
+            document.getElementById('fileInput').click();
+        }
+
+        function swapImages() {
+            if (!resultImageData) return;
+            
+            originalImageData = resultImageData;
+            originalMimeType = 'image/png'; // Result is typically PNG
+            displayOriginalImage(`data:image/png;base64,${resultImageData}`);
+            clearResult();
+        }
+
+        function saveImage() {
+            if (!resultImageData) return;
+
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+            const filename = `pcsfx_${timestamp}_${String(saveCounter).padStart(3, '0')}.png`;
+            saveCounter++;
+
+            const link = document.createElement('a');
+            link.href = `data:image/png;base64,${resultImageData}`;
+            link.download = filename;
+            link.click();
+        }
+    </script>
+</body>
+</html>

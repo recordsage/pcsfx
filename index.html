@@ -380,7 +380,9 @@
 
     <script>
         // ============ CONFIGURATION ============
-        const API_MODEL = 'gemini-3-pro-image-preview';
+        // Use gemini-2.5-flash-image (Nano Banana) - works on free tier
+        // For Nano Banana Pro, change to 'gemini-3-pro-image-preview' (requires paid plan)
+        const API_MODEL = 'gemini-2.5-flash-image';
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${API_MODEL}:generateContent`;
 
         // Effects definitions

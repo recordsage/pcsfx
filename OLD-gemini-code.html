@@ -1,0 +1,1926 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCS Fx</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Default Theme */
+        :root {
+            --bg-color: #0f172a; /* Rich dark slate */
+            --bg-overlay: radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
+                          radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.15) 0px, transparent 50%);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            background-image: 
+                var(--bg-overlay),
+                url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E");
+            background-attachment: fixed;
+            background-size: cover, cover, auto;
+            transition: background-color 0.5s ease;
+            min-height: 100vh;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .effect-btn {
+            transition: all 0.2s ease-in-out;
+        }
+        .effect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        #effects-wrapper {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+            max-height: 1000px;
+            opacity: 1;
+            overflow: hidden;
+        }
+        #effects-wrapper.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-bottom: 0;
+        }
+        .toggle-icon {
+            transition: transform 0.3s ease;
+        }
+        .collapsed-icon {
+            transform: rotate(-90deg);
+        }
+        .opt-btn.active {
+            background-color: #3b82f6; 
+            color: white;
+            border-color: #3b82f6;
+        }
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+        .toast {
+            background: rgba(31, 41, 55, 0.95);
+            border-left: 4px solid;
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.3s ease-out forwards;
+            max-width: 320px;
+            backdrop-filter: blur(4px);
+            pointer-events: auto;
+            font-size: 0.9rem;
+        }
+        .toast.info { border-color: #3b82f6; }
+        .toast.error { border-color: #ef4444; }
+        .toast.success { border-color: #22c55e; }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateY(10px); }
+        }
+    </style>
+</head>
+<body class="text-white flex flex-col items-center justify-center p-4">
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Custom Combo Modal -->
+    <div id="combo-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 hidden backdrop-blur-sm p-4">
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl max-w-sm w-full border border-gray-700">
+            <h3 class="text-xl font-bold mb-4 text-center">Create Custom Combo</h3>
+            <label class="block text-sm text-gray-400 mb-1">First Effect</label>
+            <select id="combo-select-1" class="w-full bg-gray-700 text-white rounded-lg p-3 mb-4 border border-gray-600 focus:outline-none focus:border-blue-500 appearance-none"></select>
+            <label class="block text-sm text-gray-400 mb-1">Second Effect</label>
+            <select id="combo-select-2" class="w-full bg-gray-700 text-white rounded-lg p-3 mb-6 border border-gray-600 focus:outline-none focus:border-blue-500 appearance-none"></select>
+            <div class="flex gap-3">
+                <button id="cancel-combo-btn" class="flex-1 py-2 px-4 rounded-lg bg-gray-600 hover:bg-gray-500 transition font-medium">Cancel</button>
+                <button id="apply-combo-btn" class="flex-1 py-2 px-4 rounded-lg bg-purple-600 hover:bg-purple-500 font-bold transition shadow-lg">Apply Combo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto Fx Modal -->
+    <div id="auto-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 hidden backdrop-blur-sm p-4">
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl max-w-sm w-full border border-gray-700">
+            <h3 class="text-xl font-bold mb-4 text-center bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-orange-500">Auto Fx ⚡</h3>
+            <p class="text-gray-400 text-sm mb-4 text-center">Automatically chain effects.</p>
+            
+            <label class="block text-sm text-gray-400 mb-1">Effect to Loop:</label>
+            <select id="auto-effect-select" class="w-full bg-gray-700 text-white rounded-lg p-3 mb-4 border border-gray-600 focus:outline-none focus:border-blue-500 appearance-none">
+                <option value="Random">Random (Default)</option>
+                <!-- Options populated by JS -->
+            </select>
+
+            <label class="block text-sm text-gray-400 mb-1">Iterations (2-20):</label>
+            <input type="number" id="auto-iterations-input" min="2" max="20" value="5" class="w-full bg-gray-700 text-white rounded-lg p-3 mb-4 border border-gray-600 focus:outline-none focus:border-blue-500 text-center">
+
+            <label class="block text-sm text-gray-400 mb-1">Base Filename (if saving):</label>
+            <input type="text" id="auto-filename-input" value="pcs_auto" class="w-full bg-gray-700 text-white rounded-lg p-3 mb-4 border border-gray-600 focus:outline-none focus:border-blue-500 text-center">
+
+            <div class="flex items-center gap-2 mb-6 justify-center bg-gray-700/50 p-3 rounded-lg border border-gray-600">
+                <input type="checkbox" id="auto-swap-checkbox" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 bg-gray-700 border-gray-600 cursor-pointer">
+                <label for="auto-swap-checkbox" class="text-sm text-gray-300 cursor-pointer select-none">Swap Original (Evolve on screen)</label>
+            </div>
+
+            <div class="flex gap-3">
+                <button id="cancel-auto-btn" class="flex-1 py-2 px-4 rounded-lg bg-gray-600 hover:bg-gray-500 transition font-medium">Cancel</button>
+                <button id="apply-auto-btn" class="flex-1 py-2 px-4 rounded-lg bg-orange-600 hover:bg-orange-500 font-bold transition shadow-lg">Do It</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Miniature/Logo/Quote/Prompt/Hand/Font Modals -->
+    <div id="miniature-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 hidden backdrop-blur-sm p-4">
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl max-w-sm w-full border border-gray-700">
+            <h3 class="text-xl font-bold mb-4 text-center">Miniature City Effect</h3>
+            <p class="text-gray-400 text-sm mb-4 text-center">Enter a city name to generate symbols of that city. Leave blank to use the current image content.</p>
+            <label class="block text-sm text-gray-400 mb-2">City Name (Optional):</label>
+            <input type="text" id="miniature-city-input" class="w-full bg-gray-700 text-white rounded-lg p-3 mb-6 border border-gray-600 focus:outline-none focus:border-blue-500 text-center" placeholder="e.g. Paris, Tokyo, Gotham">
+            <div class="flex gap-3">
+                <button id="cancel-miniature-btn" class="flex-1 py-2 px-4 rounded-lg bg-gray-600 hover:bg-gray-500 transition font-medium">Cancel</button>
+                <button id="apply-miniature-btn" class="flex-1 py-2 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 font-bold transition shadow-lg">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="logo-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 hidden backdrop-blur-sm p-4">
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl max-w-sm w-full border border-gray-700">
+            <h3 class="text-xl font-bold mb-4 text-center">Logo Designer</h3>
+            <p class="text-gray-400 text-sm mb-4 text-center">Enter a topic and/or text for your logo.</p>
+            <label class="block text-sm text-gray-400 mb-2">Logo Topic (Optional):</label>
+            <input type="text" id="logo-topic-input" class="w-full bg-gray-700 text-white rounded-lg p-3 mb-4 border border-gray-600 focus:outline-none focus:border-blue-500 text-center" placeholder="e.g. Coffee Shop, Cyber Security">
+            <label class="block text-sm text-gray-400 mb-2">Logo Text (Optional):</label>
+            <input type="text" id="logo-text-input" class="w-full bg-gray-700 text-white rounded-lg p-3 mb-6 border border-gray-600 focus:outline-none focus:border-blue-500 text-center" placeholder="e.g. Brand Name">
+            <div class="flex gap-3">
+                <button id="cancel-logo-btn" class="flex-1 py-2 px-4 rounded-lg bg-gray-600 hover:bg-gray-500 transition font-medium">Cancel</button>
+                <button id="apply-logo-btn" class="flex-1 py-2 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 font-bold transition shadow-lg">Design</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="quote-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 hidden backdrop-blur-sm p-4">
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl max-w-md w-full border border-gray-700">
+            <h3 class="text-xl font-bold mb-4 text-center">Quote Composer</h3>
+            <p class="text-gray-400 text-sm mb-4 text-center">Generate a composition with a pencil sketch and a quote.</p>
+            <label class="block text-sm text-gray-400 mb-2">Quote Text:</label>
+            <textarea id="quote-text-input" rows="3" class="w-full bg-gray-700 text-white rounded-lg p-3 mb-4 border border-gray-600 focus:outline-none focus:border-blue-500" placeholder="e.g. Imagination is more important than knowledge."></textarea>
+            <label class="block text-sm text-gray-400 mb-2">Author:</label>
+            <input type="text" id="quote-author-input" class="w-full bg-gray-700 text-white rounded-lg p-3 mb-4 border border-gray-600 focus:outline-none focus:border-blue-500" placeholder="e.g. Albert Einstein">
+            <div class="flex items-center gap-2 mb-6 justify-center">
+                <input type="checkbox" id="quote-use-image-checkbox" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 bg-gray-700 border-gray-600 cursor-pointer">
+                <label for="quote-use-image-checkbox" class="text-sm text-gray-300 cursor-pointer select-none">Sketch uploaded image (Uncheck to sketch Author)</label>
+            </div>
+            <div class="flex gap-3">
+                <button id="cancel-quote-btn" class="flex-1 py-2 px-4 rounded-lg bg-gray-600 hover:bg-gray-500 transition font-medium">Cancel</button>
+                <button id="apply-quote-btn" class="flex-1 py-2 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 font-bold transition shadow-lg">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="hand-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 hidden backdrop-blur-sm p-4">
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl max-w-md w-full border border-gray-700 text-white">
+            <h3 class="text-xl font-bold mb-4 text-center">Hand Painting Effect</h3>
+            <p class="text-gray-400 text-sm mb-4 text-center">Display a painting on the palm of an open hand.</p>
+            <label class="block text-sm text-gray-400 mb-2">Artist Name:</label>
+            <input type="text" id="hand-artist-input" class="w-full bg-gray-700 text-white rounded-lg p-3 mb-4 border border-gray-600 focus:outline-none focus:border-blue-500 text-center" placeholder="e.g. Caravaggio (Default)">
+            <div class="flex items-center gap-2 mb-6 justify-center">
+                <input type="checkbox" id="hand-use-image-checkbox" checked class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 bg-gray-700 border-gray-600 cursor-pointer">
+                <label for="hand-use-image-checkbox" class="text-sm text-gray-300 cursor-pointer select-none">Paint uploaded image on palm</label>
+            </div>
+            <div class="flex gap-3">
+                <button id="cancel-hand-btn" class="flex-1 py-2 px-4 rounded-lg bg-gray-700 hover:bg-gray-600 transition font-medium">Cancel</button>
+                <button id="apply-hand-btn" class="flex-1 py-2 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 font-bold transition shadow-lg">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="prompt-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 hidden backdrop-blur-sm p-4">
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl max-w-md w-full border border-gray-700">
+            <h3 class="text-xl font-bold mb-4 text-center">Custom AI Prompt</h3>
+            <p class="text-gray-400 text-sm mb-2 text-center">Describe how you want to transform the image.</p>
+            <textarea id="custom-prompt-input" rows="4" class="w-full bg-gray-700 text-white rounded-lg p-3 mb-4 border border-gray-600 focus:outline-none focus:border-blue-500" placeholder="e.g. Turn this into a cyberpunk city with neon lights..."></textarea>
+            <div class="flex items-center gap-2 mb-6 justify-center">
+                <input type="checkbox" id="use-image-checkbox" checked class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 bg-gray-700 border-gray-600 cursor-pointer">
+                <label for="use-image-checkbox" class="text-sm text-gray-300 cursor-pointer select-none">Use original image as reference</label>
+            </div>
+            <div class="flex gap-3">
+                <button id="cancel-prompt-btn" class="flex-1 py-2 px-4 rounded-lg bg-gray-700 hover:bg-gray-600 transition font-medium">Cancel</button>
+                <button id="apply-prompt-btn" class="flex-1 py-2 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 font-bold transition shadow-lg">Generate</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="font-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 hidden backdrop-blur-sm p-4">
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl max-w-md w-full border border-gray-700 text-white">
+            <h3 class="text-xl font-bold mb-4 text-center">Font Effect</h3>
+            <p class="text-gray-400 text-sm mb-4 text-center">Stylize text using the image or AI creativity.</p>
+            <label class="block text-sm text-gray-400 mb-2">Text to Display:</label>
+            <textarea id="font-text-input" rows="3" class="w-full bg-gray-700 text-white rounded-lg p-3 mb-4 border border-gray-600 focus:outline-none focus:border-blue-500 text-center text-lg font-bold" placeholder="ENTER TEXT"></textarea>
+            <div class="flex items-center gap-2 mb-6 justify-center">
+                <!-- Removed 'checked' attribute to default to AI Generation mode -->
+                <input type="checkbox" id="font-use-mask-checkbox" class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500 bg-gray-700 border-gray-600 cursor-pointer">
+                <label for="font-use-mask-checkbox" class="text-sm text-gray-300 cursor-pointer select-none">Use image as text fill (Mask)</label>
+            </div>
+            <div class="flex gap-3">
+                <button id="cancel-font-btn" class="flex-1 py-2 px-4 rounded-lg bg-gray-700 hover:bg-gray-600 transition font-medium">Cancel</button>
+                <button id="apply-font-btn" class="flex-1 py-2 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 font-bold transition shadow-lg">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="qr-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 hidden backdrop-blur-sm p-4">
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl max-w-sm w-full border border-gray-700 text-white">
+            <h3 class="text-xl font-bold mb-4 text-center">QR Code Generator</h3>
+            <p class="text-gray-400 text-sm mb-4 text-center">Generate a stylish QR code.</p>
+            <label class="block text-sm text-gray-400 mb-2">URL or Text Data:</label>
+            <input type="text" id="qr-data-input" class="w-full bg-gray-700 text-white rounded-lg p-3 mb-4 border border-gray-600 focus:outline-none focus:border-blue-500 text-center" placeholder="https://example.com">
+            <label class="block text-sm text-gray-400 mb-2">Center Overlay:</label>
+            <input type="text" id="qr-text-input" maxlength="5" class="w-full bg-gray-700 text-white rounded-lg p-3 mb-2 border border-gray-600 focus:outline-none focus:border-blue-500 text-center uppercase" placeholder="TEXT (Max 5)">
+            <div class="flex flex-col gap-2 mb-6">
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="qr-use-image-checkbox" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 bg-gray-700 border-gray-600 cursor-pointer">
+                    <label for="qr-use-image-checkbox" class="text-sm text-gray-300 cursor-pointer select-none">Use uploaded image as logo</label>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button id="cancel-qr-btn" class="flex-1 py-2 px-4 rounded-lg bg-gray-700 hover:bg-gray-600 transition font-medium">Cancel</button>
+                <button id="apply-qr-btn" class="flex-1 py-2 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 font-bold transition shadow-lg">Generate</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Text Overlay Modal -->
+    <div id="text-overlay-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 hidden backdrop-blur-sm p-4">
+        <div class="bg-gray-800 p-6 rounded-2xl shadow-2xl max-w-md w-full border border-gray-700">
+            <h3 class="text-xl font-bold mb-4 text-center">Add Text Overlay</h3>
+            <label class="block text-sm text-gray-400 mb-2">Caption:</label>
+            <textarea id="text-overlay-input" rows="3" class="w-full bg-gray-700 text-white rounded-lg p-3 mb-4 border border-gray-600 focus:outline-none focus:border-blue-500 text-center text-lg font-medium" placeholder="TYPE YOUR&#10;TEXT HERE"></textarea>
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Horizontal Align</label>
+                    <div class="flex gap-1">
+                        <button class="opt-btn flex-1 py-1 px-2 text-sm border border-gray-600 rounded bg-gray-700 hover:bg-gray-600" data-group="halign" data-value="left">L</button>
+                        <button class="opt-btn active flex-1 py-1 px-2 text-sm border border-gray-600 rounded bg-gray-700 hover:bg-gray-600" data-group="halign" data-value="center">C</button>
+                        <button class="opt-btn flex-1 py-1 px-2 text-sm border border-gray-600 rounded bg-gray-700 hover:bg-gray-600" data-group="halign" data-value="right">R</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Vertical Align</label>
+                    <div class="flex gap-1">
+                        <button class="opt-btn flex-1 py-1 px-2 text-sm border border-gray-600 rounded bg-gray-700 hover:bg-gray-600" data-group="valign" data-value="top">Top</button>
+                        <button class="opt-btn flex-1 py-1 px-2 text-sm border border-gray-600 rounded bg-gray-700 hover:bg-gray-600" data-group="valign" data-value="middle">Mid</button>
+                        <button class="opt-btn active flex-1 py-1 px-2 text-sm border border-gray-600 rounded bg-gray-700 hover:bg-gray-600" data-group="valign" data-value="bottom">Bot</button>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label class="block text-xs text-gray-400 mb-1">Text Size</label>
+                <div class="flex gap-2">
+                     <button class="opt-btn active flex-1 py-2 text-sm border border-gray-600 rounded bg-gray-700 hover:bg-gray-600" data-group="size" data-value="large">Large (Box)</button>
+                     <button class="opt-btn flex-1 py-2 text-sm border border-gray-600 rounded bg-gray-700 hover:bg-gray-600" data-group="size" data-value="small">Small (Strip)</button>
+                </div>
+            </div>
+            <div class="mb-6">
+                <label class="block text-xs text-gray-400 mb-1">Glass Theme</label>
+                <div class="flex gap-2">
+                     <button class="opt-btn active flex-1 py-2 text-sm border border-gray-600 rounded bg-gray-700 hover:bg-gray-600" data-group="theme" data-value="dark">Dark Glass</button>
+                     <button class="opt-btn flex-1 py-2 text-sm border border-gray-600 rounded bg-gray-700 hover:bg-gray-600" data-group="theme" data-value="light">Light Glass</button>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button id="cancel-overlay-btn" class="flex-1 py-2 px-4 rounded-lg bg-gray-600 hover:bg-gray-500 transition font-medium">Cancel</button>
+                <button id="apply-overlay-btn" class="flex-1 py-2 px-4 rounded-lg bg-blue-600 hover:bg-blue-500 font-bold transition shadow-lg">Apply Overlay</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full max-w-5xl mx-auto relative z-10">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">PCS Fx</h1>
+            <p class="text-gray-400 mt-2 text-lg">Upload an image and select an effect to transform it with AI.</p>
+        </header>
+
+        <main class="w-full">
+            
+            <!-- Step 1: Image Upload (Updated with Drag & Drop & Paste) -->
+            <div id="upload-section" class="text-center py-16 px-6 border-2 border-dashed border-gray-700 rounded-2xl bg-gray-800/30 transition-all duration-300 hover:border-gray-500 hover:bg-gray-800/50">
+                <div class="pointer-events-none">
+                    <svg class="w-16 h-16 mx-auto mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                    
+                    <div class="flex flex-col sm:flex-row justify-center items-center gap-3 mb-2 pointer-events-auto">
+                        <label for="image-upload" class="cursor-pointer inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300 shadow-lg hover:shadow-blue-500/30 w-full sm:w-auto">
+                            Choose File
+                        </label>
+                        <span class="text-gray-500 text-sm font-medium">OR</span>
+                        <button id="paste-button" class="cursor-pointer inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors duration-300 shadow-lg hover:shadow-purple-500/30 w-full sm:w-auto">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                            Paste Image
+                        </button>
+                    </div>
+
+                    <p class="text-gray-400 mt-2">or drag and drop your image here</p>
+                </div>
+                <input type="file" id="image-upload" class="hidden" accept="image/*">
+                <!-- Hidden input for the second image for double exposure (legacy structure) -->
+                <input type="file" id="second-image-upload" class="hidden" accept="image/*">
+                <p class="text-gray-500 text-xs mt-8 pointer-events-none">&copy; 2025 <a href="https://pcs-works.com" target="_blank" class="hover:text-gray-300 transition-colors">PCS</a>. All rights reserved.</p>
+            </div>
+
+            <!-- Step 2: Effects & Image Display -->
+            <div id="editor-section" class="hidden bg-gray-800/80 backdrop-blur-sm p-6 md:p-8 rounded-2xl shadow-2xl border border-gray-700/50">
+                 <!-- Effect buttons Header (Toggle & Redo) -->
+                <div class="flex items-center justify-between mb-4 gap-3">
+                    <!-- Selector / Toggle -->
+                    <div id="effects-header" class="flex-grow flex justify-between items-center cursor-pointer bg-gray-700/30 hover:bg-gray-700/50 p-3 rounded-xl transition-colors border border-gray-700/50" title="Click to show/hide effects">
+                        <div class="flex items-center gap-3">
+                            <h2 class="text-lg md:text-xl font-semibold">Choose an Effect</h2>
+                            <span id="current-effect-label" class="text-sm text-blue-400 font-medium hidden"></span>
+                        </div>
+                        <svg id="toggle-icon" class="toggle-icon w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </div>
+
+                    <!-- Redo Button -->
+                    <button id="redo-button" class="hidden flex-shrink-0 bg-blue-600 hover:bg-blue-500 disabled:bg-gray-600 disabled:cursor-not-allowed text-white p-3 rounded-xl shadow-lg transition-all transform active:scale-95 flex items-center gap-2" title="Let's do that again!">
+                        <span class="font-bold text-lg">Let's do that again!</span>
+                    </button>
+                </div>
+
+                <div id="effects-wrapper" class="mb-8">
+                    <div id="effects-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 pb-2">
+                        <!-- Effect buttons will be generated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Image containers -->
+                <div class="grid md:grid-cols-2 gap-6 md:gap-8 items-start">
+                    <div class="w-full">
+                        <h3 class="text-xl font-semibold mb-3 text-center text-gray-300">Original</h3>
+                        <div class="bg-gray-700/50 p-2 rounded-lg aspect-square flex items-center justify-center border border-gray-600" id="original-image-container">
+                             <div class="relative inline-block" id="image-wrapper">
+                                <img id="original-image" src="" alt="Original" class="max-w-full max-h-full object-contain rounded-md block">
+                                <!-- Extra overlay specific to Auto Fx progress could go here if needed, but using global toast/loader -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-full">
+                        <div class="flex justify-center items-center mb-3 gap-3">
+                             <h3 class="text-xl font-semibold text-gray-300">Result</h3>
+                             <div class="flex gap-2">
+                                <button id="copy-button" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded-lg text-sm transition-colors duration-300 shadow-md flex items-center gap-1" title="Copy to Clipboard">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                                    Copy
+                                </button>
+                                <button id="save-button" class="hidden bg-green-600 hover:bg-green-700 text-white font-semibold py-1 px-3 rounded-lg text-sm transition-colors duration-300 shadow-md flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    Save
+                                </button>
+                             </div>
+                        </div>
+                        <div id="result-container" class="bg-gray-700/50 p-2 rounded-lg aspect-square flex items-center justify-center relative overflow-hidden">
+                             <div id="loader" class="loader hidden"></div>
+                             <div id="auto-progress-overlay" class="absolute inset-0 bg-black/60 z-20 hidden flex flex-col items-center justify-center text-white backdrop-blur-sm">
+                                <div class="loader mb-4"></div>
+                                <h3 id="auto-progress-text" class="text-xl font-bold mb-2">Processing...</h3>
+                                <button id="stop-auto-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg">STOP</button>
+                             </div>
+                             <p id="result-placeholder" class="text-gray-400">Your transformed image will appear here</p>
+                            <img id="result-image" src="" alt="Result" class="hidden max-w-full max-h-full object-contain rounded-md">
+                        </div>
+                    </div>
+                </div>
+                 <!-- Bottom Actions -->
+                 <div class="flex flex-col md:flex-row justify-center items-center gap-4 mt-6">
+                    <button id="reset-button" class="bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors duration-300 shadow-md w-full md:w-auto">Upload New Image</button>
+                    
+                    <button id="use-input-button" class="hidden bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2 px-5 rounded-lg transition-colors duration-300 shadow-md flex items-center justify-center gap-2 w-full md:w-auto" title="Move current result to original slot to apply more effects">
+                        <span>Swap Result with Original ➡️</span>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // --- DOM Elements ---
+        const imageUpload = document.getElementById('image-upload');
+        const secondImageUpload = document.getElementById('second-image-upload');
+        const uploadSection = document.getElementById('upload-section');
+        const editorSection = document.getElementById('editor-section');
+        const originalImage = document.getElementById('original-image');
+        const resultImage = document.getElementById('result-image');
+        const resultContainer = document.getElementById('result-container');
+        const resultPlaceholder = document.getElementById('result-placeholder');
+        const loader = document.getElementById('loader');
+        const effectsContainer = document.getElementById('effects-container');
+        const resetButton = document.getElementById('reset-button');
+        const saveButton = document.getElementById('save-button');
+        const copyButton = document.getElementById('copy-button'); 
+        const useInputButton = document.getElementById('use-input-button');
+        const pasteButton = document.getElementById('paste-button');
+        const toastContainer = document.getElementById('toast-container');
+        
+        // Auto Fx Elements
+        const autoModal = document.getElementById('auto-modal');
+        const autoEffectSelect = document.getElementById('auto-effect-select'); // New Element
+        const autoIterationsInput = document.getElementById('auto-iterations-input');
+        const autoFilenameInput = document.getElementById('auto-filename-input');
+        const autoSwapCheckbox = document.getElementById('auto-swap-checkbox');
+        const cancelAutoBtn = document.getElementById('cancel-auto-btn');
+        const applyAutoBtn = document.getElementById('apply-auto-btn');
+        const autoProgressOverlay = document.getElementById('auto-progress-overlay');
+        const autoProgressText = document.getElementById('auto-progress-text');
+        const stopAutoBtn = document.getElementById('stop-auto-btn');
+
+        // Toggle elements
+        const effectsHeader = document.getElementById('effects-header');
+        const effectsWrapper = document.getElementById('effects-wrapper');
+        const toggleIcon = document.getElementById('toggle-icon');
+        const currentEffectLabel = document.getElementById('current-effect-label');
+        const redoButton = document.getElementById('redo-button');
+
+        // Modal Elements
+        const comboModal = document.getElementById('combo-modal');
+        const comboSelect1 = document.getElementById('combo-select-1');
+        const comboSelect2 = document.getElementById('combo-select-2');
+        const cancelComboBtn = document.getElementById('cancel-combo-btn');
+        const applyComboBtn = document.getElementById('apply-combo-btn');
+
+        // Miniature Modal
+        const miniatureModal = document.getElementById('miniature-modal');
+        const miniatureCityInput = document.getElementById('miniature-city-input');
+        const cancelMiniatureBtn = document.getElementById('cancel-miniature-btn');
+        const applyMiniatureBtn = document.getElementById('apply-miniature-btn');
+
+        // Logo Modal
+        const logoModal = document.getElementById('logo-modal');
+        const logoTopicInput = document.getElementById('logo-topic-input');
+        const logoTextInput = document.getElementById('logo-text-input'); 
+        const cancelLogoBtn = document.getElementById('cancel-logo-btn');
+        const applyLogoBtn = document.getElementById('apply-logo-btn');
+
+        // Quote Modal
+        const quoteModal = document.getElementById('quote-modal');
+        const quoteTextInput = document.getElementById('quote-text-input');
+        const quoteAuthorInput = document.getElementById('quote-author-input');
+        const quoteUseImageCheckbox = document.getElementById('quote-use-image-checkbox');
+        const cancelQuoteBtn = document.getElementById('cancel-quote-btn');
+        const applyQuoteBtn = document.getElementById('apply-quote-btn');
+
+        // Font Modal
+        const fontModal = document.getElementById('font-modal');
+        const fontTextInput = document.getElementById('font-text-input');
+        const fontUseMaskCheckbox = document.getElementById('font-use-mask-checkbox');
+        const cancelFontBtn = document.getElementById('cancel-font-btn');
+        const applyFontBtn = document.getElementById('apply-font-btn');
+
+        // Custom Prompt Modal
+        const promptModal = document.getElementById('prompt-modal');
+        const customPromptInput = document.getElementById('custom-prompt-input');
+        const useImageCheckbox = document.getElementById('use-image-checkbox'); // Checkbox ref
+        const cancelPromptBtn = document.getElementById('cancel-prompt-btn');
+        const applyPromptBtn = document.getElementById('apply-prompt-btn');
+
+        // Hand Modal
+        const handModal = document.getElementById('hand-modal');
+        const handArtistInput = document.getElementById('hand-artist-input');
+        const handUseImageCheckbox = document.getElementById('hand-use-image-checkbox');
+        const cancelHandBtn = document.getElementById('cancel-hand-btn');
+        const applyHandBtn = document.getElementById('apply-hand-btn');
+
+        // QR Modal
+        const qrModal = document.getElementById('qr-modal');
+        const qrDataInput = document.getElementById('qr-data-input');
+        const qrTextInput = document.getElementById('qr-text-input');
+        const qrUseImageCheckbox = document.getElementById('qr-use-image-checkbox');
+        const cancelQrBtn = document.getElementById('cancel-qr-btn');
+        const applyQrBtn = document.getElementById('apply-qr-btn');
+
+        // Text Overlay Modal
+        const textOverlayModal = document.getElementById('text-overlay-modal');
+        const textOverlayInput = document.getElementById('text-overlay-input');
+        const cancelOverlayBtn = document.getElementById('cancel-overlay-btn');
+        const applyOverlayBtn = document.getElementById('apply-overlay-btn');
+
+
+        // --- State ---
+        let base64ImageData = null;
+        let imageMimeType = null;
+        let secondBase64ImageData = null;
+        let secondImageMimeType = null;
+        let currentEffectName = null;
+        let currentComboEffects = { effect1: null, effect2: null }; 
+        let isAutoFxRunning = false;
+
+        // Text Overlay Settings state
+        let textOverlaySettings = {
+            halign: 'center',
+            valign: 'bottom',
+            theme: 'dark', // Will be randomized inside function, kept here for initial default
+            size: 'large' // New: large (box) or small (strip)
+        };
+
+        const effects = {
+            // --- Auto ---
+            'Auto Fx ⚡': 'SPECIAL_AUTO',
+
+            // --- Drawing & Sketching ---
+            'Pencil Sketch': 'Transform this image into a detailed graphite pencil sketch.',
+            'Color Pencil': 'Transform this image into a detailed colored pencil drawing with visible strokes.',
+            'Vibrant Color Pencil': 'Transform this image into a colored pencil drawing, where the main subject is rendered with intensely vivid, highly saturated, and rich colors. Focus the most vibrant pigments, layered textures, and detailed pencil strokes specifically on the primary focal point (person, object, or animal) to make it pop. The background should be kept more muted, neutral, or less saturated in comparison, contrasting with the subject to draw the eye directly to it.',
+            'Notebook Sketch': () => {
+                const isLined = Math.random() < 0.5;
+                const paperDescription = isLined 
+                    ? "lined notebook paper (with horizontal blue lines)" 
+                    : "plain white sketch paper";
+                
+                return `Transform this image into a realistic ballpoint pen sketch on a sheet of ${paperDescription}. The subject should look like a detailed hand-drawn doodle using blue ballpoint ink, featuring visible cross-hatching, shading, and pen pressure variations. The background must be replaced with the texture of ${paperDescription} to complete the illusion.`;
+            },
+            'Color Chalk': 'Redraw this image as if it were a vibrant color chalk drawing on a dark pavement.',
+            'B&W Chalk': 'Redraw this image as if it were a black and white chalk drawing on a blackboard.',
+
+            // --- Artistic Styles ---
+            'Hand Painting ✋': 'SPECIAL_HAND',
+            'Font Effect 🅰️': 'SPECIAL_FONT',
+            'Watercolor': 'Transform this image using traditional wet-on-wet watercolor technique with soft pigment diffusion and natural color bleeding. Edges should be soft and organic, avoiding hard outlines except where the focal subject requires gentle definition. Apply layered translucent washes, gradually building depth on cold-press watercolor paper with subtle grain. Colors should be slightly desaturated, harmonious, and blended smoothly. Preserve the subject\'s essential form but simplify fine details into expressive brush shapes. Lighting should feel diffuse. Background should dissolve into loose, abstract washes. Overall aesthetic: elegant, calm, painterly, and timeless.',
+            'Surrealism': 'Transform this image into a Surrealist masterpiece. Introduce dreamlike logic, strange juxtapositions, and unexpected scale changes while maintaining photorealistic details. Create a mysterious, psychological atmosphere where objects behave in impossible ways, inspired by the essence of 20th-century surrealism.',
+            'Abstract Art': 'Transform this image into an abstract composition. Deconstruct the subject into geometric shapes, sweeping lines, and splashes of color. Focus on the emotional essence and energy of the scene rather than realistic details. Use a mix of textures and vibrant colors to create a modern, artistic interpretation.',
+            'Pop Art': 'Transform this image into a vibrant Pop Art style illustration inspired by Andy Warhol and Roy Lichtenstein. Use bold, saturated, high-contrast colors (primary reds, yellows, blues), thick black outlines, and comic-book style Ben-Day dots for shading. Simplify details into strong, flat graphical shapes to create a retro, mass-media aesthetic.',
+            'Afremov Style': 'Transform this image to mimic the style of Leonid Afremov, using vibrant, bold colors and a palette knife texture.',
+            'Picasso Style': 'Transform this image into a Cubist painting style inspired by Pablo Picasso. Fragment the subject into geometric shapes and interlocking planes to show multiple viewpoints simultaneously. Use a palette of earthy tones mixed with bold, contrasting colors. Rearrange facial features or objects in an abstract, angular, yet recognizable way, characteristic of analytic or synthetic cubism.',
+            'Dali Style': 'Reimagine this image in the style of Salvador Dali\'s surrealism. Introduce dreamlike, fluid, or melting qualities to objects or the background. Place the subject in a vast, barren, dream-like landscape with sharp, eerie shadows. The rendering should be hyper-realistic but depict a bizarre, subconscious reality with strange juxtapositions.',
+            'Nagel Style': 'Redraw this image in the iconic 1980s Art Deco style of Patrick Nagel. Use bold, clean lines, flat planes of vibrant color with minimal shading, and a sleek, stylized aesthetic. Capture the cool, sleek aesthetic with simple, uncluttered backgrounds.',
+            'Palekh Style': 'Transform this image into a traditional Russian Palekh miniature painting. The background must be a deep, glossy black, mimicking a lacquered box. Render the subject using vibrant, glowing tempera colors (bright reds, emerald greens, deep blues) with elongated, elegant forms typical of folk art. Accentuate the details with intricate, fine gold line work and ornamental gold leaf highlights, creating a magical, fairytale aesthetic.',
+            'Caricature': 'Exaggerate the main features in this photo to create a funny caricature drawing.',
+
+            // --- Digital & Graphic ---
+            'Logo Design 🎨': 'SPECIAL_LOGO',
+            'Quote Effect 💬': 'SPECIAL_QUOTE',
+            'QR Code 📱': 'SPECIAL_QR',
+            'Vibrant Line Art': 'Transform this image into a geometric vector illustration in a flat design style. Break down all subjects and backgrounds into simple, angular geometric shapes (triangles, polygons). Fill each shape with a solid, vibrant color from a limited palette, with no gradients, shadows, or complex textures. The final image should be clean, modern, and abstract, composed entirely of these flat, colored geometric facets.',
+            'Stipple Portrait': 'Transform this image into a high-contrast monochrome minimalist illustration. Render the main subjects with smooth, photorealistic textures where appropriate, while using dense, intricate pointillist or stippling patterns for clothing, backgrounds, or textured surfaces. Emphasize strong tonal contrast and negative space.',
+
+            // --- Material & Texture ---
+            'Stone Sculpture 🗿': 'Transform the subject of this image so it appears to be masterfully carved into solid stone, as if sculpted by a world-class artisan. Preserve the subject’s exact proportions, contours, and defining details with high fidelity. Material: Hyper-realistic stone surface with visible chisel marks, micro-fractures, erosion, and weathering. Natural imperfections like tiny cracks and worn edges. Matte finish. Lighting: Dramatic cinematic lighting, low-angle raking light to accentuate depth and relief. Soft ambient fill. Mood: Epic, timeless, museum-quality. Color: Natural stone palette (cool grays, warm limestone tones). Quality: Ultra-high resolution, photorealistic, no cartoon or painterly effects. Looks like a real stone sculpture photographed with a cinema camera.',
+            'Marble Sculpture': (originalPrompt) => { 
+                const types = ['white (Carrara)', 'black', 'green (Verde Antico)', 'rose (Rosa Portugal)'];
+                const marbleType = types[Math.floor(Math.random() * types.length)];
+                return `Transform the entire content of this image into a photorealistic sculpture made from ${marbleType} marble. Preserve the original composition, subjects, and background exactly, but render all elements as if they are carved from a single block of polished ${marbleType} marble. Emphasize smooth surfaces, subtle chiseled details, and the characteristic veining and subtle translucence of the stone.`;
+            },
+            'Gold Foil Emboss': 'Transform this image into a photorealistic gold foil embossing. The entire image should appear as if it has been pressed into a sheet of metallic gold foil, creating a raised, 3D relief effect based on the contours of the original image. Emphasize the reflective metallic texture, warm high-contrast highlights, and deep shadows typical of embossed metal. The color palette should be monochromatic metallic gold.',
+            'Wood Engraving': 'Transform this entire image into a photorealistic pyrography piece, as if burned onto a rustic wooden surface using a magnifying glass. The image should be rendered in monochrome tones of sepia, brown, and charcoal, simulating different depths of burn marks. Emphasize the texture of the wood grain, knots, and imperfections, showing how the burning interacts with the wood surface. The edges of the burned areas should be slightly charred.',
+            'Repoussé Effect': () => {
+                const metals = ['copper', 'bronze', 'silver', 'brass', 'pewter'];
+                const metal = metals[Math.floor(Math.random() * metals.length)];
+                return `Transform this image into a photorealistic repoussé metalwork masterpiece crafted from ${metal}. The subject should appear to be hammered into relief from the reverse side of the metal sheet. Emphasize the hand-crafted texture, visible tool marks, and varying depths of relief. Include realistic metallic reflections and shadows, along with a subtle patina or oxidation in the crevices appropriate for ${metal} to enhance the 3D effect and antique character.`;
+            },
+            'Paper Art': 'Create a high-quality image transforming this input into a multi-layered paper cut-out illustration. 3D shadow box style, stacked layers of colored paper, distinct clean edges, deep drop shadows. Vivid rich color palette, tactile paper texture. Organic paper shapes retaining original composition. Do not add text.',
+            'Leaf Art': 'Transform this image into a photorealistic leaf carving masterpiece. A single large, detailed autumn leaf fills the frame against a blurred background. The main subject is intricately carved *into* the leaf itself using negative space. Crucially, the subject must be strictly confined within the natural boundaries of the leaf; any part of the subject that would extend beyond the leaf\'s edge is treated as removed/invisible. Use pronounced, 100% transparent cutouts to define the subject\'s shape, revealing the background through these gaps. Minimize random holes in the leaf outside the main subject area to keep the leaf structure solid. The result is a fragile, backlit leaf art piece where the image exists only as voids within the leaf\'s organic shape.',
+            'Miniature': 'SPECIAL_MINIATURE',
+
+            // --- Filters ---
+            'Grayscale': 'Apply a grayscale filter to this image.',
+            'Monochrome Tint': () => {
+                const colors = ['Red', 'Blue', 'Green', 'Purple', 'Cyan', 'Sepia', 'Teal', 'Magenta', 'Gold'];
+                const selectedColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                return `Convert this image into a monochrome ${selectedColor}-tinted photograph. The image should look exactly like a black and white photo, but using shades of ${selectedColor} instead of gray. Preserve all the original details, lighting, and contrast of the source image, simply re-rendering it in a single-color palette of ${selectedColor} tones against black/dark shadows.`;
+            },
+
+            // --- Backgrounds ---
+            'Surprise Background': () => {
+                const backgrounds = [
+                    "a futuristic sci-fi city with neon lights and high-tech architecture",
+                    "a beautiful, vibrant garden filled with blooming flowers and soft sunlight",
+                    "a serene tropical beach at golden hour with palm trees",
+                    "a dramatic mountain peak overlooking a sea of clouds",
+                    "a modern, minimalist photography studio with abstract geometric lighting",
+                    "a mystical enchanted forest with glowing fireflies",
+                    "a bustling city street at night with colorful bokeh lights"
+                ];
+                const bg = backgrounds[Math.floor(Math.random() * backgrounds.length)];
+                return `Keep the main foreground elements (whether people, objects, animals, or logos) exactly as they are, preserving their identity, details, and lighting. Replace the original background with ${bg}. Ensure the foreground elements blend realistically into this new environment.`;
+            },
+            'Smart Background': 'Analyze the main foreground elements (people, objects, logos, etc.) and their current environment. Replace the background with a completely new, high-quality setting that complements the subject\'s style. If the foreground is a person, consider themes that match their attire or vibe. If it is an object or logo, choose a clean, professional, or thematic background that highlights it effectively. Alternatively, upgrade the current location to a "parallel universe" version (e.g., a messy room becomes a luxury apartment). Keep the foreground elements visually unchanged but blend them realistically into the new background.',
+            'Holiday Theme': () => {
+                const now = new Date();
+                const month = now.getMonth(); 
+                const date = now.getDate();
+                
+                let theme = "";
+
+                if (month === 9 && date > 15) { 
+                    theme = "a spooky and fun Halloween scene with carved pumpkins, cobwebs, and moody orange/purple lighting";
+                } else if (month === 10 && date < 5) { 
+                    theme = "a colorful Dia de los Muertos theme with marigolds and sugar skull decorations";
+                } else if (month === 10) { 
+                    theme = "a warm, cozy Thanksgiving setting with autumn leaves, pumpkins, and a festive rustic atmosphere";
+                } else if (month === 11) { 
+                    const decThemes = [
+                        "a festive Christmas scene with a decorated tree, twinkling lights, and a cozy fireplace",
+                        "a warm Hanukkah setting with a glowing menorah, dreidels, and soft blue and silver decor",
+                        "a magical Winter Wonderland with falling snow and soft white lights"
+                    ];
+                    theme = decThemes[Math.floor(Math.random() * decThemes.length)];
+                } else if (month === 0) { 
+                    theme = "a festive New Year's celebration with fireworks in the distance, confetti, and party lights";
+                } else if (month === 1 && date > 5 && date < 16) { 
+                    theme = "a romantic Valentine's Day setting with soft pink/red florals, hearts, and elegant candle lighting";
+                } else if ((month === 2 && date > 20) || month === 3) { 
+                    const springThemes = [
+                        "a vibrant spring garden with blooming tulips and soft pastel colors",
+                        "an elegant Passover setting with a traditional Seder table arrangement",
+                        "a cheerful Easter theme with spring flowers, painted eggs, and soft sunlight"
+                    ];
+                    theme = springThemes[Math.floor(Math.random() * springThemes.length)];
+                } else if (month >= 4 && month <= 7) { 
+                    theme = "a bright, sunny summer beach scene with blue ocean, golden sand, and palm trees";
+                } else { 
+                    theme = "a crisp autumn park scene with colorful falling leaves in shades of orange, red, and gold";
+                }
+
+                return `Keep the main foreground elements (whether people, objects, animals, or logos) exactly as they are, preserving their identity, details, and lighting. Replace the background with ${theme}. Ensure the lighting and shadows on the foreground elements match this festive environment perfectly.`;
+            },
+
+            // --- Tools ---
+            'Sneaky Lines': 'LOCAL_CANVAS_EFFECT',
+            'Custom Prompt ✨': 'SPECIAL_PROMPT',
+
+            // --- Combos ---
+            'Custom Combo': 'SPECIAL_CUSTOM_COMBO',
+            
+            // --- Final Tool ---
+            'Text Overlay 📝': 'LOCAL_CANVAS_EFFECT'
+        };
+
+        // --- Functions ---
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            let iconHtml = '';
+            if (type === 'error') iconHtml = '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+            else if (type === 'success') iconHtml = '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+            else iconHtml = '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+            toast.innerHTML = `${iconHtml}<span>${message}</span>`;
+            toastContainer.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s ease-in forwards';
+                toast.addEventListener('animationend', () => { toast.remove(); });
+            }, 4000);
+        }
+
+        function saveImage(sourceDataUrl = null, filename = 'ai-generated-image') {
+            const src = (typeof sourceDataUrl === 'string') ? sourceDataUrl : resultImage.src;
+            if (!src) return;
+            
+            fetch(src)
+                .then(res => res.blob())
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = filename + '.png';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    setTimeout(() => URL.revokeObjectURL(url), 100);
+                    showToast("Image saved!", "success");
+                })
+                .catch(err => {
+                    console.error("Save failed:", err);
+                    showToast("Failed to save image.", "error");
+                });
+        }
+
+        async function copyImageToClipboard() {
+            if (!resultImage.src) return;
+            try {
+                if (!navigator.clipboard || !navigator.clipboard.write) throw new Error("Clipboard API unavailable");
+                const response = await fetch(resultImage.src);
+                const blob = await response.blob();
+                await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+                showToast("Image copied to clipboard!", "success");
+            } catch (err) {
+                console.warn("Copy failed:", err);
+                showToast("Browser blocked direct copy. Please Right-Click > Copy Image.", "info");
+            }
+        }
+
+        function extractRandomColorFromImage(imgElement) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 50;
+            canvas.height = 50;
+            ctx.drawImage(imgElement, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            const offset = Math.floor(Math.random() * (imageData.length / 4)) * 4;
+            const r = imageData[offset];
+            const g = imageData[offset + 1];
+            const b = imageData[offset + 2];
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function getSquareImage(base64Str) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const size = Math.min(img.width, img.height);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = size;
+                    canvas.height = size;
+                    const ctx = canvas.getContext('2d');
+                    const sx = (img.width - size) / 2;
+                    const sy = (img.height - size) / 2;
+                    ctx.drawImage(img, sx, sy, size, size, 0, 0, size, size);
+                    resolve(canvas.toDataURL('image/png').split(',')[1]);
+                };
+                img.src = "data:image/png;base64," + base64Str;
+            });
+        }
+        
+        function highlightDropZone() {
+            uploadSection.classList.add('border-blue-500', 'bg-gray-800/80', 'scale-[1.02]');
+            uploadSection.classList.remove('border-gray-500', 'bg-gray-800/50');
+        }
+
+        function unhighlightDropZone() {
+            uploadSection.classList.remove('border-blue-500', 'bg-gray-800/80', 'scale-[1.02]');
+            uploadSection.classList.add('border-gray-500', 'bg-gray-800/50');
+        }
+
+        // --- Modal & UI Toggles ---
+        function showComboModal() {
+            if (comboSelect1.children.length === 0) {
+                const keys = Object.keys(effects).filter(k => 
+                    k !== 'Custom Combo' && k !== 'Custom Prompt ✨' &&
+                    effects[k] !== 'LOCAL_CANVAS_EFFECT' && effects[k] !== 'SPECIAL_MINIATURE' &&
+                    effects[k] !== 'SPECIAL_LOGO' && effects[k] !== 'SPECIAL_QUOTE' &&
+                    effects[k] !== 'SPECIAL_HAND' && effects[k] !== 'SPECIAL_QR' &&
+                    effects[k] !== 'SPECIAL_FONT' && effects[k] !== 'SPECIAL_AUTO'
+                );
+                keys.forEach(key => {
+                    const opt1 = document.createElement('option'); opt1.value = key; opt1.textContent = key; comboSelect1.appendChild(opt1);
+                    const opt2 = document.createElement('option'); opt2.value = key; opt2.textContent = key; comboSelect2.appendChild(opt2);
+                });
+                if (keys.length > 1) comboSelect2.selectedIndex = 1;
+            }
+            comboModal.classList.remove('hidden');
+        }
+        function hideComboModal() { comboModal.classList.add('hidden'); }
+        function showMiniatureModal() { miniatureModal.classList.remove('hidden'); }
+        function hideMiniatureModal() { miniatureModal.classList.add('hidden'); }
+        function showLogoModal() { logoModal.classList.remove('hidden'); }
+        function hideLogoModal() { logoModal.classList.add('hidden'); }
+        function showQuoteModal() { quoteModal.classList.remove('hidden'); }
+        function hideQuoteModal() { quoteModal.classList.add('hidden'); }
+        function showFontModal() { fontModal.classList.remove('hidden'); }
+        function hideFontModal() { fontModal.classList.add('hidden'); }
+        function showPromptModal() { promptModal.classList.remove('hidden'); }
+        function hidePromptModal() { promptModal.classList.add('hidden'); }
+        function showHandModal() { handModal.classList.remove('hidden'); }
+        function hideHandModal() { handModal.classList.add('hidden'); }
+        function showQrModal() { qrModal.classList.remove('hidden'); }
+        function hideQrModal() { qrModal.classList.add('hidden'); }
+        function showTextOverlayModal() { textOverlayModal.classList.remove('hidden'); }
+        function hideTextOverlayModal() { textOverlayModal.classList.add('hidden'); }
+        function showAutoModal() { autoModal.classList.remove('hidden'); }
+        function hideAutoModal() { autoModal.classList.add('hidden'); }
+        
+        function toggleEffects(forceState = null) {
+            const isCollapsed = effectsWrapper.classList.contains('collapsed');
+            const shouldCollapse = forceState !== null ? forceState : !isCollapsed;
+            if (shouldCollapse) {
+                effectsWrapper.classList.add('collapsed');
+                toggleIcon.classList.add('collapsed-icon');
+            } else {
+                effectsWrapper.classList.remove('collapsed');
+                toggleIcon.classList.remove('collapsed-icon');
+            }
+        }
+
+        // --- Core Application Logic ---
+        function processFile(file) {
+             if (!file) return;
+            imageMimeType = file.type || 'image/png';
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const dataUrl = reader.result;
+                originalImage.src = dataUrl;
+                base64ImageData = dataUrl.split(',')[1];
+                resultImage.src = '';
+                resultImage.classList.add('hidden');
+                resultPlaceholder.classList.remove('hidden');
+                resultPlaceholder.textContent = 'Your transformed image will appear here';
+                saveButton.classList.add('hidden');
+                copyButton.classList.add('hidden');
+                useInputButton.classList.add('hidden'); 
+                toggleEffects(false);
+                currentEffectLabel.classList.add('hidden');
+                currentEffectLabel.textContent = '';
+                redoButton.classList.add('hidden');
+                currentEffectName = null;
+                uploadSection.classList.add('hidden');
+                editorSection.classList.remove('hidden');
+                unhighlightDropZone();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            processFile(file);
+        }
+
+        async function handlePasteClick() {
+            try {
+                const clipboardItems = await navigator.clipboard.read();
+                for (const item of clipboardItems) {
+                    const imageType = item.types.find(type => type.startsWith('image/'));
+                    if (imageType) {
+                        const blob = await item.getType(imageType);
+                        processFile(blob);
+                        return; 
+                    }
+                }
+                showToast("No image found in clipboard.", "error");
+            } catch (err) {
+                console.warn("Clipboard read failed:", err);
+                showToast("Browser blocked clipboard access. Use Ctrl+V.", "info");
+            }
+        }
+
+        function resetApp() {
+            imageUpload.value = '';
+            base64ImageData = null;
+            imageMimeType = null;
+            currentEffectName = null;
+            originalImage.src = '';
+            resultImage.src = '';
+            resultImage.classList.add('hidden');
+            resultPlaceholder.classList.remove('hidden');
+            uploadSection.classList.remove('hidden');
+            editorSection.classList.add('hidden');
+            saveButton.classList.add('hidden');
+            copyButton.classList.add('hidden');
+            useInputButton.classList.add('hidden');
+            redoButton.classList.add('hidden');
+        }
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                loader.classList.remove('hidden');
+                resultPlaceholder.classList.add('hidden');
+                resultImage.classList.add('hidden');
+                saveButton.classList.add('hidden');
+                copyButton.classList.add('hidden');
+                useInputButton.classList.add('hidden');
+                redoButton.disabled = true;
+                redoButton.classList.add('opacity-50');
+            } else {
+                loader.classList.add('hidden');
+                redoButton.disabled = false;
+                redoButton.classList.remove('opacity-50');
+            }
+        }
+
+        // --- API Functions ---
+        async function generateImageFromText(prompt) {
+            const apiKey = "";
+            // Use Imagen model for text-to-image
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`;
+            const payload = { instances: [{ prompt: prompt }], parameters: { sampleCount: 1 } };
+            
+            let retries = 3; let delay = 1000;
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (response.ok) {
+                        const result = await response.json();
+                        if (result.predictions && result.predictions[0]?.bytesBase64Encoded) return result.predictions[0].bytesBase64Encoded;
+                        throw new Error("No image data found.");
+                    } else if (response.status >= 500 || response.status === 429) {
+                        throw new Error(`API ${response.status}`);
+                    } else {
+                        const txt = await response.text();
+                        throw new Error(`API Error: ${response.status} ${txt}`);
+                    }
+                } catch (error) {
+                    if (i === retries - 1) throw error;
+                    await new Promise(r => setTimeout(r, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        async function identifySubjectAndGetQuote(imageData) {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const prompt = `Analyze the image. 
+            Priority 1: If the image contains visible text/quote, transcribe it EXACTLY. Identify author or "Unknown".
+            Priority 2: If no text, identify subject. Select a famous, impactful, VERY SHORT quote (max 10 words) by them.
+            Priority 3: If subject not famous, generate short profound quote matching mood.
+            CRITICAL: Quote MUST be in English. Verify spelling.
+            Return ONLY JSON: { "author": "Name", "quote": "Quote text" }`;
+            const payload = { contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/png", data: imageData } }] }], generationConfig: { responseMimeType: "application/json" } };
+            
+            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!response.ok) throw new Error("Quote analysis failed");
+            const result = await response.json();
+            let text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!text) throw new Error("No text returned");
+            return JSON.parse(text.replace(/```json\n?|\n?```/g, '').trim());
+        }
+
+        async function getQuoteByAuthor(authorName) {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const prompt = `Select a famous, impactful, VERY SHORT quote (max 10 words) specifically by ${authorName}. Quote MUST be English. Verify spelling. Return ONLY JSON: { "quote": "Quote text" }`;
+            const payload = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { responseMimeType: "application/json" } };
+            
+            const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!response.ok) throw new Error("Quote fetch failed");
+            const result = await response.json();
+            let text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (!text) throw new Error("No text returned");
+            return JSON.parse(text.replace(/```json\n?|\n?```/g, '').trim());
+        }
+
+        async function refineImageWithText(base64Image, textToEnforce) {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
+            const prompt = `Fix text in this image. Text MUST read EXACTLY: "${textToEnforce}".
+            1. REMOVE duplicate words. 2. Fix spelling. 3. Keep pencil sketch style/metal background. 4. Keep font.`;
+            const payload = { contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/png", data: base64Image } }] }], generationConfig: { responseModalities: ["TEXT", "IMAGE"] } };
+            return generateImageWithRetryLogic(apiUrl, payload);
+        }
+
+        async function generateImageWithRetryLogic(apiUrl, payload) {
+            let retries = 3; let delay = 1000;
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (response.ok) {
+                        const textResponse = await response.text();
+                        if (!textResponse.trim()) throw new Error("Empty response");
+                        const result = JSON.parse(textResponse);
+                        const base64Data = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                        if (base64Data) return base64Data;
+                        const finishReason = result.candidates?.[0]?.finishReason;
+                        if (finishReason === 'SAFETY') { const e = new Error("Safety block"); e.isFatal = true; throw e; }
+                        // If we got text but no image, it's a failure for image gen purposes
+                        if (result.candidates?.[0]?.content?.parts?.find(p => p.text)) throw new Error("API returned text, no image");
+                        throw new Error("No image data");
+                    } else if (response.status >= 500 || response.status === 429) {
+                        throw new Error(`API ${response.status}`);
+                    } else {
+                        const e = new Error(`API Fatal ${response.status}`); e.isFatal = true; throw e;
+                    }
+                } catch (error) {
+                    if (error.isFatal || i === retries - 1) throw error;
+                    await new Promise(r => setTimeout(r, delay));
+                    delay *= 2;
+                }
+            }
+        }
+        
+        async function generateImageWithRetry(prompt, imageData, mimeType) {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
+            const parts = [{ text: prompt }];
+            if (imageData && mimeType) parts.push({ inlineData: { mimeType: mimeType, data: imageData } });
+            const payload = { contents: [{ parts: parts }], generationConfig: { responseModalities: ["TEXT", "IMAGE"] } };
+            return generateImageWithRetryLogic(apiUrl, payload);
+        }
+
+        // --- Effect Handlers ---
+        async function applyTextOverlayEffect(text) {
+             return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                img.onload = () => {
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+                    ctx.drawImage(img, 0, 0);
+                    // ... (Simplifying font logic for brevity, keeping core logic)
+                    const fonts = ['Inter', 'Arial', 'Verdana', 'Georgia', 'Courier New', 'Impact', 'Times New Roman', 'Trebuchet MS', 'Comic Sans MS'];
+                    const randomFont = fonts[Math.floor(Math.random() * fonts.length)];
+                    // ... (Full implementation logic from previous steps preserved in spirit)
+                    // Drawing simplistic overlay for now to ensure code stability, previous elaborate logic was prone to copy-paste errors
+                    // Re-implementing robustly:
+                    const sampleCanvas = document.createElement('canvas');
+                    const sampleCtx = sampleCanvas.getContext('2d');
+                    sampleCanvas.width = 50; 
+                    sampleCanvas.height = 50;
+                    sampleCtx.drawImage(img, 0, 0, 50, 50);
+                    const sampleData = sampleCtx.getImageData(0, 0, 50, 50).data;
+                    const offset = Math.floor(Math.random() * (sampleData.length / 4)) * 4;
+                    const r = sampleData[offset];
+                    const g = sampleData[offset + 1];
+                    const b = sampleData[offset + 2];
+                    const a = 0.2 + Math.random() * 0.3; 
+                    const boxColor = `rgba(${r},${g},${b},${a})`;
+                    let finalBoxColor = boxColor;
+                    let textColor;
+                    if (textOverlaySettings.theme === 'light') {
+                        finalBoxColor = `rgba(255,255,255,${a})`;
+                        textColor = '#000000';
+                    } else {
+                        if (textOverlaySettings.theme === 'light') {
+                           finalBoxColor = `rgba(255, 255, 255, ${a})`;
+                           textColor = '#000000';
+                        } else {
+                           finalBoxColor = `rgba(0, 0, 0, ${a})`;
+                           textColor = '#ffffff';
+                        }
+                    }
+                    const lines = text.split('\n');
+                    
+                    if (textOverlaySettings.size === 'small') {
+                        const stripHeight = Math.max(40, Math.min(150, canvas.height * 0.08));
+                        const readableFonts = ['Inter', 'Arial', 'Verdana', 'Helvetica', 'Trebuchet MS', 'Segoe UI', 'Roboto'];
+                        const selectedFont = readableFonts[Math.floor(Math.random() * readableFonts.length)];
+                        let fontSize = stripHeight * 0.55; 
+                        ctx.font = `bold ${fontSize}px "${selectedFont}", sans-serif`;
+                        const singleLineText = lines.join('  •  '); 
+                        let textMetrics = ctx.measureText(singleLineText);
+                        let textWidth = textMetrics.width;
+                        const maxTextWidth = canvas.width * 0.9;
+                        if (textWidth > maxTextWidth) {
+                            const scaleFactor = maxTextWidth / textWidth;
+                            fontSize *= scaleFactor;
+                            ctx.font = `bold ${fontSize}px "${selectedFont}", sans-serif`;
+                            textMetrics = ctx.measureText(singleLineText);
+                            textWidth = textMetrics.width;
+                        }
+                        const paddingX = stripHeight * 0.3; 
+                        const stripWidth = textWidth + (paddingX * 2);
+                        let stripY = 0;
+                        if (textOverlaySettings.valign === 'top') {
+                            stripY = canvas.height * 0.05; 
+                        } else if (textOverlaySettings.valign === 'bottom') {
+                            stripY = canvas.height - stripHeight - (canvas.height * 0.05);
+                        } else {
+                            stripY = (canvas.height - stripHeight) / 2;
+                        }
+                        let stripX = 0;
+                        if (textOverlaySettings.halign === 'left') {
+                            stripX = canvas.width * 0.05;
+                        } else if (textOverlaySettings.halign === 'right') {
+                            stripX = canvas.width - stripWidth - (canvas.width * 0.05);
+                        } else {
+                            stripX = (canvas.width - stripWidth) / 2;
+                        }
+                        ctx.save();
+                        ctx.beginPath();
+                        const r = stripHeight * 0.2; 
+                        ctx.moveTo(stripX + r, stripY);
+                        ctx.lineTo(stripX + stripWidth - r, stripY);
+                        ctx.quadraticCurveTo(stripX + stripWidth, stripY, stripX + stripWidth, stripY + r);
+                        ctx.lineTo(stripX + stripWidth, stripY + stripHeight - r);
+                        ctx.quadraticCurveTo(stripX + stripWidth, stripY + stripHeight, stripX + stripWidth - r, stripY + stripHeight);
+                        ctx.lineTo(stripX + r, stripY + stripHeight);
+                        ctx.quadraticCurveTo(stripX, stripY + stripHeight, stripX, stripY + stripHeight - r);
+                        ctx.lineTo(stripX, stripY + r);
+                        ctx.quadraticCurveTo(stripX, stripY, stripX + r, stripY);
+                        ctx.closePath();
+                        ctx.save();
+                        ctx.clip();
+                        ctx.filter = 'blur(10px)';
+                        ctx.drawImage(img, 0, 0);
+                        ctx.filter = 'none';
+                        ctx.restore();
+                        ctx.fillStyle = finalBoxColor;
+                        ctx.fill();
+                        ctx.lineWidth = Math.max(1, stripHeight * 0.03);
+                        ctx.strokeStyle = textColor;
+                        ctx.stroke();
+                        ctx.restore();
+                        ctx.fillStyle = textColor;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        const centerY = stripY + (stripHeight / 2);
+                        const centerX = stripX + (stripWidth / 2);
+                        ctx.fillText(singleLineText, centerX, centerY);
+                    } else {
+                        // Large box logic
+                        let fontSize = canvas.width / 10; 
+                        ctx.font = `bold ${fontSize}px "${randomFont}", sans-serif`;
+                        let maxWidth = 0;
+                        lines.forEach(l => {
+                            const m = ctx.measureText(l);
+                            if (m.width > maxWidth) maxWidth = m.width;
+                        });
+                        const widthFactor = 0.5 + Math.random() * 0.4; 
+                        const targetTextWidth = canvas.width * widthFactor;
+                        if (maxWidth > 0) {
+                            fontSize = fontSize * (targetTextWidth / maxWidth);
+                        }
+                        const minFont = canvas.width / 20;
+                        const maxFont = canvas.width / 5;
+                        fontSize = Math.max(minFont, Math.min(maxFont, fontSize));
+                        const paddingH = fontSize * (1.0 + Math.random() * 0.8);
+                        const paddingV = fontSize * (0.5 + Math.random());
+                        const lineHeight = fontSize * 1.2;
+                        ctx.font = `bold ${fontSize}px "${randomFont}", sans-serif`;
+                        let finalMaxTextWidth = 0;
+                         lines.forEach(l => {
+                            const m = ctx.measureText(l);
+                            if (m.width > finalMaxTextWidth) finalMaxTextWidth = m.width;
+                        });
+                        const boxWidth = finalMaxTextWidth + (paddingH * 2);
+                        const boxHeight = (lines.length * lineHeight) + (paddingV * 2) - (lineHeight - fontSize);
+                        let boxX, boxY;
+                        if (textOverlaySettings.halign === 'left') {
+                            boxX = canvas.width * 0.05; 
+                        } else if (textOverlaySettings.halign === 'right') {
+                            boxX = canvas.width - boxWidth - (canvas.width * 0.05);
+                        } else { 
+                            boxX = (canvas.width - boxWidth) / 2;
+                        }
+                        if (textOverlaySettings.valign === 'top') {
+                            boxY = canvas.height * 0.05;
+                        } else if (textOverlaySettings.valign === 'bottom') {
+                            boxY = canvas.height - boxHeight - (canvas.height * 0.05);
+                        } else { 
+                            boxY = (canvas.height - boxHeight) / 2;
+                        }
+                        
+                        // Define p1...p4 before drawing
+                        const dX = boxWidth * 0.05; 
+                        const dY = boxHeight * 0.1;
+                        const p1 = { x: boxX + (Math.random() * dX), y: boxY + (Math.random() * dY) };
+                        const p2 = { x: boxX + boxWidth - (Math.random() * dX), y: boxY + (Math.random() * dY) };
+                        const p3 = { x: boxX + boxWidth - (Math.random() * dX), y: boxY + boxHeight - (Math.random() * dY) };
+                        const p4 = { x: boxX + (Math.random() * dX), y: boxY + boxHeight - (Math.random() * dY) };
+
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.lineTo(p3.x, p3.y);
+                        ctx.lineTo(p4.x, p4.y);
+                        ctx.closePath();
+                        ctx.save();
+                        ctx.clip();
+                        ctx.filter = 'blur(15px)';
+                        ctx.drawImage(img, 0, 0);
+                        ctx.filter = 'none';
+                        ctx.restore();
+                        ctx.fillStyle = finalBoxColor;
+                        ctx.fill();
+                        ctx.lineWidth = 3; 
+                        ctx.strokeStyle = textColor;
+                        ctx.stroke();
+                        ctx.restore(); 
+                        
+                        ctx.fillStyle = textColor;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        
+                        // Define center coordinates using the points we just defined
+                        const textCenterX = (p1.x + p2.x + p3.x + p4.x) / 4;
+                        const textCenterY = (p1.y + p2.y + p3.y + p4.y) / 4;
+                        
+                        const totalTextH = lines.length * lineHeight;
+                        const startTextY = textCenterY - (totalTextH / 2) + (lineHeight / 2);
+                        
+                        lines.forEach((line, i) => {
+                            ctx.fillText(line.trim(), textCenterX, startTextY + (i * lineHeight));
+                        });
+                    }
+                    resolve(canvas.toDataURL('image/png').split(',')[1]);
+                };
+                img.src = "data:image/png;base64," + base64ImageData;
+             });
+        }
+        
+        async function applySneakyLinesEffect() {
+             return new Promise((resolve) => {
+                 const canvas = document.createElement('canvas');
+                 const ctx = canvas.getContext('2d');
+                 const img = new Image();
+                 img.onload = () => {
+                     canvas.width = img.naturalWidth;
+                     canvas.height = img.naturalHeight;
+                     const maskColor = extractRandomColorFromImage(img);
+                     ctx.fillStyle = maskColor;
+                     ctx.fillRect(0,0,canvas.width, canvas.height);
+                     ctx.save();
+                     ctx.beginPath();
+                     // Vertical lines
+                     const lineWidth = Math.max(10, canvas.width * 0.05);
+                     for(let x=0; x<canvas.width; x+=lineWidth*2) {
+                         ctx.rect(x, 0, lineWidth, canvas.height);
+                     }
+                     ctx.clip();
+                     ctx.drawImage(img, 0, 0);
+                     ctx.restore();
+                     resolve(canvas.toDataURL('image/png').split(',')[1]);
+                 };
+                 img.src = "data:image/png;base64," + base64ImageData;
+             });
+        }
+
+        async function applyFontMaskEffect(text, sourceImage = null) {
+             return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const img = new Image();
+                
+                // Use provided source or fallback to global base64ImageData
+                const source = sourceImage || base64ImageData;
+
+                img.onload = () => {
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+                    
+                    // 1. Clear canvas (Transparent) - Critical for mask to work
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    // 2. Setup Font Sizing & Wrapping
+                    // Increased padding to 20% (10% per side) to prevent cutting off
+                    const maxW = canvas.width * 0.8; 
+                    const maxH = canvas.height * 0.8;
+                    
+                    let fontSize = 400; // Start huge
+                    let lines = [];
+                    
+                    ctx.textBaseline = 'middle';
+                    ctx.textAlign = 'center';
+                    
+                    // Helper to wrap text into lines based on current font size
+                    const calculateLines = (size) => {
+                        ctx.font = `900 ${size}px "Inter", sans-serif`; 
+                        
+                        // Split by user-entered newlines first
+                        const paragraphs = text.split('\n');
+                        const finalLines = [];
+
+                        paragraphs.forEach(paragraph => {
+                            if (!paragraph) {
+                                finalLines.push("");
+                                return;
+                            }
+                            const words = paragraph.split(' ');
+                            let currentLine = words[0];
+
+                            for (let i = 1; i < words.length; i++) {
+                                const testLine = currentLine + " " + words[i];
+                                const metrics = ctx.measureText(testLine);
+                                if (metrics.width > maxW) {
+                                    finalLines.push(currentLine);
+                                    currentLine = words[i];
+                                } else {
+                                    currentLine = testLine;
+                                }
+                            }
+                            finalLines.push(currentLine);
+                        });
+                        return finalLines;
+                    };
+
+                    // Iterative sizing loop
+                    while (fontSize > 10) {
+                        ctx.font = `900 ${fontSize}px "Inter", sans-serif`;
+                        lines = calculateLines(fontSize);
+                        
+                        const totalHeight = lines.length * (fontSize * 1.1); 
+                        
+                        let maxWidthFound = 0;
+                        lines.forEach(line => {
+                            const m = ctx.measureText(line);
+                            if (m.width > maxWidthFound) maxWidthFound = m.width;
+                        });
+
+                        if (totalHeight < maxH && maxWidthFound < maxW) {
+                            break; 
+                        }
+                        
+                        if (maxWidthFound > maxW * 1.5 || totalHeight > maxH * 1.5) {
+                             fontSize -= 40;
+                        } else if (maxWidthFound > maxW * 1.2 || totalHeight > maxH * 1.2) {
+                             fontSize -= 10;
+                        } else {
+                             fontSize -= 2;
+                        }
+                    }
+
+                    // 3. Draw Text (Opaque) - This defines the mask shape
+                    ctx.fillStyle = 'white'; 
+                    const lineHeight = fontSize * 1.1;
+                    const totalBlockHeight = lines.length * lineHeight;
+                    const startY = (canvas.height - totalBlockHeight) / 2 + (lineHeight/2);
+                    
+                    lines.forEach((line, i) => {
+                         ctx.fillText(line.toUpperCase(), canvas.width/2, startY + (i * lineHeight));
+                    });
+
+                    // 4. Composite Image INSIDE Text
+                    ctx.globalCompositeOperation = 'source-in';
+                    ctx.drawImage(img, 0, 0);
+
+                    // 5. Draw Background BEHIND the text
+                    ctx.globalCompositeOperation = 'destination-over';
+                    ctx.fillStyle = '#0f172a'; // Dark slate background
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    resolve(canvas.toDataURL('image/png').split(',')[1]);
+                };
+                img.src = "data:image/png;base64," + source;
+             });
+        }
+
+        async function applyQRCodeEffect(url, centerText, useImageLogo) {
+             return new Promise((resolve, reject) => {
+                const canvas = document.createElement('canvas');
+                // Increased size for sharper rendering
+                const size = 1000;
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+
+                // 1. Generate Basic QR (Black on White)
+                const qr = new QRious({
+                    element: document.createElement('canvas'), 
+                    value: url || "https://google.com",
+                    size: size,
+                    level: 'H', // High error correction
+                    background: 'white',
+                    foreground: 'black'
+                });
+                
+                // Random solid color if no gradient
+                const hue = Math.floor(Math.random() * 360);
+                const fgColor = `hsl(${hue}, 100%, 25%)`; 
+                
+                // Redraw QR with specific color
+                 const qrColor = new QRious({
+                    element: document.createElement('canvas'), 
+                    value: url || "https://google.com",
+                    size: size,
+                    level: 'H', 
+                    background: 'white',
+                    foreground: fgColor
+                });
+                ctx.drawImage(qrColor.element, 0, 0);
+
+                // 4. Center Element (Logo or Text)
+                const centerX = size / 2;
+                const centerY = size / 2;
+                const centerSize = size * 0.22; // Safe size for center content
+
+                if (useImageLogo === 'true' && base64ImageData) {
+                    // Load the main image to use as logo
+                    const logo = new Image();
+                    logo.onload = () => {
+                        // Draw white box border
+                        ctx.fillStyle = 'white';
+                        const border = 15;
+                        ctx.fillRect(centerX - centerSize/2 - border, centerY - centerSize/2 - border, centerSize + border*2, centerSize + border*2);
+                        
+                        // Draw Image
+                        ctx.drawImage(logo, centerX - centerSize/2, centerY - centerSize/2, centerSize, centerSize);
+                        resolve(canvas.toDataURL('image/png').split(',')[1]);
+                    };
+                    logo.onerror = () => { resolve(canvas.toDataURL('image/png').split(',')[1]); }; // Fallback if image fails
+                    logo.src = "data:image/png;base64," + base64ImageData;
+                } 
+                else if (centerText) {
+                    // Draw Text
+                    const text = centerText.toUpperCase().substring(0, 6);
+                    const fontSize = size * 0.12; 
+                    ctx.font = `bold ${fontSize}px "Inter", sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    
+                    const metrics = ctx.measureText(text);
+                    const padding = fontSize * 0.4;
+                    const boxW = metrics.width + padding;
+                    const boxH = fontSize * 1.4;
+
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(centerX - boxW/2, centerY - boxH/2, boxW, boxH);
+
+                    ctx.fillStyle = 'black'; // Text color
+                    ctx.fillText(text, centerX, centerY);
+                    
+                    resolve(canvas.toDataURL('image/png').split(',')[1]);
+                } else {
+                    resolve(canvas.toDataURL('image/png').split(',')[1]);
+                }
+             });
+        }
+        
+        async function runAutoLoop() {
+            const iterations = parseInt(autoIterationsInput.value) || 5;
+            const baseFilename = autoFilenameInput.value.trim() || 'pcs_auto';
+            const swapMode = autoSwapCheckbox.checked;
+            const selectedEffect = autoEffectSelect.value; // Get selected effect
+            hideAutoModal();
+
+            if (iterations < 2 || iterations > 20) {
+                showToast("Iterations must be between 2 and 20", "error");
+                return;
+            }
+
+            // NEW: Collapse effects panel to maximize image visibility
+            toggleEffects(true);
+            currentEffectLabel.classList.remove('hidden');
+            currentEffectLabel.textContent = `(Auto Fx: ${selectedEffect === 'Random' ? 'Random Chain' : selectedEffect})`;
+
+            isAutoFxRunning = true;
+            autoProgressOverlay.classList.remove('hidden');
+            
+            // Safe effects list (excluding tools that need input)
+            const safeEffects = Object.keys(effects).filter(k => {
+                const val = effects[k];
+                if (k === 'Font Effect 🅰️') return true; 
+                if (typeof val === 'function') return true;
+                return typeof val === 'string' && !val.startsWith('SPECIAL') && !val.startsWith('LOCAL');
+            });
+
+            // Create a pool of effects to draw from to ensure uniqueness (if random)
+            let effectPool = [...safeEffects];
+
+            let currentData = base64ImageData;
+            let currentMime = imageMimeType;
+
+            for (let i = 1; i <= iterations; i++) {
+                if (!isAutoFxRunning) break; // User cancelled
+
+                autoProgressText.textContent = `Processing ${i} of ${iterations}...`;
+                
+                let effectName;
+                
+                if (selectedEffect === 'Random') {
+                    // Random Mode: Pick random effect from pool
+                    if (effectPool.length === 0) {
+                        effectPool = [...safeEffects]; // Refill
+                    }
+                    const poolIndex = Math.floor(Math.random() * effectPool.length);
+                    effectName = effectPool[poolIndex];
+                    effectPool.splice(poolIndex, 1); // Remove to prevent repeat if possible
+                } else {
+                    // Specific Effect Mode: Use user selection
+                    effectName = selectedEffect;
+                }
+
+                let result = null;
+                let resultMime = "image/jpeg"; // Default return type
+
+                try {
+                    // Handle Font Effect locally
+                    if (effectName === 'Font Effect 🅰️') {
+                         // FIXED: Default to Creative AI Mode (Text-to-Image) for Auto Fx
+                         // Instead of masking the previous image, we generate new typography.
+                         const prompt = `A highly creative, artistic typography design of the word: "PCS FX". 
+                         Style: Unique, bold, illustrative font. High resolution, centered on a clean background. 
+                         The letters themselves should be visually interesting (e.g. 3D, neon, metallic, floral, or abstract).`;
+                         
+                         try {
+                             // Try High Quality generation first
+                             result = await generateImageFromText(prompt);
+                         } catch (e) {
+                             console.warn("Imagen failed in AutoFx, fallback to Gemini:", e);
+                             // Fallback to Gemini (Text-to-Image)
+                             result = await generateImageWithRetry(prompt, null, null);
+                         }
+                         resultMime = "image/jpeg";
+                    } else {
+                        // Standard AI Effect
+                        let prompt = effects[effectName];
+                        
+                        // If effect is a function, execute it to get prompt string
+                        if (typeof prompt === 'function') {
+                             const tempImg = new Image();
+                             tempImg.src = "data:" + currentMime + ";base64," + currentData;
+                             prompt = prompt(tempImg); 
+                        }
+
+                        result = await generateImageWithRetry(prompt, currentData, currentMime);
+                        resultMime = "image/jpeg"; 
+                    }
+                    
+                    if (result) {
+                        // Success
+                        currentData = result;
+
+                        if (swapMode) {
+                            // EVOLVE MODE: Update currentData for next loop
+                            currentData = result;
+                            currentMime = resultMime;
+
+                            // Update UI to reflect change
+                            originalImage.src = `data:${currentMime};base64,${currentData}`;
+                            base64ImageData = currentData; 
+                            imageMimeType = currentMime;
+                        } else {
+                            // VARIATION MODE: Do NOT update currentData. 
+                            // Next loop will use the original image again.
+                            // Just save the result.
+                            const saveName = `${baseFilename}_${i.toString().padStart(2, '0')}`;
+                            saveImage(`data:${resultMime};base64,${result}`, saveName);
+                        }
+                        
+                        // Always show the latest result on the right
+                        resultImage.src = `data:${resultMime};base64,${result}`;
+                        resultImage.classList.remove('hidden');
+                        resultPlaceholder.classList.add('hidden');
+
+                    } else {
+                        // Failed, retry this iteration with a different effect ONLY if in Random mode
+                        if (selectedEffect === 'Random') {
+                            console.warn(`Step ${i} failed (${effectName}), retrying...`);
+                            i--; 
+                        } else {
+                             console.warn(`Step ${i} failed (${effectName}). Continuing...`);
+                        }
+                    }
+                } catch (e) {
+                    console.error(`Auto loop error at step ${i}:`, e);
+                }
+                
+                await new Promise(r => setTimeout(r, 500));
+            }
+
+            isAutoFxRunning = false;
+            autoProgressOverlay.classList.add('hidden');
+            
+            saveButton.classList.remove('hidden'); 
+            copyButton.classList.remove('hidden'); 
+            useInputButton.classList.remove('hidden');
+            showToast("Auto Fx Complete!", "success");
+        }
+
+        async function applyEffect(effectName, customPrompt = null, useImage = true, textToRefine = null) {
+             // 1. Handle Modal Triggers (No image required to open modal)
+            if (effects[effectName] === 'SPECIAL_MINIATURE' && !customPrompt) { showMiniatureModal(); return; }
+            if (effects[effectName] === 'SPECIAL_LOGO' && !customPrompt) { showLogoModal(); return; }
+            if (effects[effectName] === 'SPECIAL_QUOTE' && !customPrompt) { showQuoteModal(); return; }
+            if (effects[effectName] === 'SPECIAL_PROMPT' && !customPrompt) { showPromptModal(); return; }
+            if (effects[effectName] === 'SPECIAL_HAND' && !customPrompt) { showHandModal(); return; }
+            if (effects[effectName] === 'SPECIAL_FONT' && !customPrompt) { showFontModal(); return; }
+            if (effects[effectName] === 'SPECIAL_AUTO') { showAutoModal(); return; }
+            if (effects[effectName] === 'SPECIAL_QR' && !customPrompt) { showQrModal(); return; } // Added
+
+            // 2. Image Guard Clause
+            // QR Code is special: if it has customPrompt, we check the parts to see if image is needed, or just let it pass if useImage argument was handled.
+            // But the button listener calls it with 2 args, so useImage=true.
+            // Exception for QR Code:
+            if (effectName !== 'QR Code 📱' && useImage && !base64ImageData) { showToast("Upload image first", "error"); return; }
+
+            toggleEffects(true);
+            currentEffectLabel.classList.remove('hidden');
+            currentEffectLabel.textContent = `(Current: ${effectName})`;
+            currentEffectName = effectName;
+            redoButton.classList.remove('hidden');
+            setLoading(true);
+
+            try {
+                if (effects[effectName] === 'LOCAL_CANVAS_EFFECT') {
+                    let res;
+                    if (effectName === 'Sneaky Lines') res = await applySneakyLinesEffect();
+                    else res = await applyTextOverlayEffect(textOverlayInput.value || "Text");
+                    resultImage.src = `data:image/png;base64,${res}`;
+                    resultImage.classList.remove('hidden');
+                    saveButton.classList.remove('hidden'); copyButton.classList.remove('hidden'); useInputButton.classList.remove('hidden');
+                    resultPlaceholder.classList.add('hidden');
+                    setLoading(false);
+                    return;
+                }
+                
+                if (effectName === 'Font Effect 🅰️' && customPrompt && useImage) {
+                    const res = await applyFontMaskEffect(customPrompt);
+                    resultImage.src = `data:image/png;base64,${res}`;
+                    resultImage.classList.remove('hidden');
+                    saveButton.classList.remove('hidden'); copyButton.classList.remove('hidden'); useInputButton.classList.remove('hidden');
+                    resultPlaceholder.classList.add('hidden');
+                    setLoading(false);
+                    return;
+                }
+                
+                if (effectName === 'QR Code 📱') {
+                    // QR Code parses customPrompt string
+                    const parts = customPrompt.split("|");
+                    const res = await applyQRCodeEffect(parts[0], parts[1], parts[2]);
+                    resultImage.src = `data:image/png;base64,${res}`;
+                    resultImage.classList.remove('hidden');
+                    saveButton.classList.remove('hidden'); copyButton.classList.remove('hidden'); useInputButton.classList.remove('hidden');
+                    resultPlaceholder.classList.add('hidden');
+                    setLoading(false);
+                    return;
+                }
+
+                let effectiveData = base64ImageData;
+                if (effectName === 'Quote Effect 💬' && useImage) effectiveData = await getSquareImage(base64ImageData);
+
+                let generated;
+                const isTextToImg = (effectName === 'Custom Prompt ✨' || effectName === 'Quote Effect 💬' || (effectName === 'Font Effect 🅰️' && !useImage));
+                
+                if (isTextToImg && !useImage) {
+                    let finalPrompt = customPrompt;
+                    if (effectName === 'Font Effect 🅰️') {
+                         finalPrompt = `A highly creative, artistic typography design of the word or phrase: "${customPrompt}". 
+                         Style: Unique, bold, illustrative font. High resolution, centered on a clean background. 
+                         The letters themselves should be visually interesting (e.g. 3D, neon, metallic, floral, or abstract).`;
+                    }
+                    try { generated = await generateImageFromText(finalPrompt); }
+                    catch(e) { console.warn("Fallback to Gemini"); generated = await generateImageWithRetry(finalPrompt, null, null); }
+                } else if (effectName === 'Custom Combo') {
+                    let e1 = currentComboEffects.effect1;
+                    let e2 = currentComboEffects.effect2;
+                    currentEffectLabel.textContent = `(Combo: ${e1} + ${e2})`;
+                    
+                    let p1 = effects[e1];
+                    if (typeof p1 === 'function') p1 = p1(originalImage);
+                    const i1 = await generateImageWithRetry(p1, effectiveData, imageMimeType);
+                    
+                    let p2 = effects[e2];
+                    if (typeof p2 === 'function') p2 = p2(originalImage);
+                    generated = await generateImageWithRetry(p2, i1, "image/jpeg");
+                } else {
+                    let p = customPrompt || effects[effectName];
+                    if (typeof p === 'function') p = p(originalImage);
+                    generated = await generateImageWithRetry(p, effectiveData, imageMimeType);
+                }
+
+                if (generated && textToRefine) {
+                    showToast("Refining text...", "info");
+                    try { const refined = await refineImageWithText(generated, textToRefine); if(refined) generated = refined; }
+                    catch(e) { console.warn("Refine failed"); }
+                }
+
+                if (generated) {
+                    resultImage.src = `data:image/png;base64,${generated}`;
+                    resultImage.classList.remove('hidden');
+                    saveButton.classList.remove('hidden'); copyButton.classList.remove('hidden'); useInputButton.classList.remove('hidden');
+                    resultPlaceholder.classList.add('hidden');
+                } else {
+                    throw new Error("Generation failed");
+                }
+            } catch (e) {
+                console.error(e);
+                resultPlaceholder.textContent = e.message;
+                resultPlaceholder.classList.remove('hidden');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // --- Event Listeners ---
+        function initialize() {
+            // Populate Auto Fx Dropdown
+            const safeEffects = Object.keys(effects).filter(k => {
+                const val = effects[k];
+                // Explicitly allow Font Effect (defaults to "PCS FX")
+                if (k === 'Font Effect 🅰️') return true; 
+                
+                if (typeof val === 'function') return true;
+                // Exclude other SPECIAL (modals) and LOCAL (interactive tools)
+                return typeof val === 'string' && !val.startsWith('SPECIAL') && !val.startsWith('LOCAL');
+            });
+            
+            // Sort Alphabetically
+            safeEffects.sort();
+
+            // Clear current options to rebuild with Random at top
+            autoEffectSelect.innerHTML = '';
+
+            // 1. Add Random Option
+            const randomOpt = document.createElement('option');
+            randomOpt.value = 'Random';
+            randomOpt.textContent = 'Random (Default)';
+            autoEffectSelect.appendChild(randomOpt);
+
+            // 2. Add Sorted Effects
+            safeEffects.forEach(effect => {
+                const opt = document.createElement('option');
+                opt.value = effect;
+                opt.textContent = effect;
+                autoEffectSelect.appendChild(opt);
+            });
+
+            Object.keys(effects).forEach(name => {
+                const button = document.createElement('button');
+                button.textContent = name;
+                button.className = 'effect-btn w-full bg-gray-700 hover:bg-purple-600 text-white font-medium py-3 px-2 rounded-md shadow-md';
+                
+                // Color highlighters for special/tool buttons
+                if (name === 'Custom Combo' || name === 'Custom Prompt ✨' || name === 'Logo Design 🎨' || name === 'Quote Effect 💬' || name === 'Hand Painting ✋' || name === 'QR Code 📱' || name === 'Font Effect 🅰️') {
+                    button.classList.remove('bg-gray-700', 'hover:bg-purple-600');
+                    button.classList.add('bg-purple-600', 'hover:bg-purple-500');
+                } 
+                if (name === 'Auto Fx ⚡') {
+                    button.classList.remove('bg-gray-700', 'hover:bg-purple-600');
+                    button.classList.add('bg-orange-600', 'hover:bg-orange-500'); // Orange for Auto Fx
+                }
+                
+                if (name === 'Custom Combo') {
+                     button.onclick = () => showComboModal();
+                } else if (name === 'Text Overlay 📝') {
+                     button.onclick = () => showTextOverlayModal();
+                } else {
+                    button.onclick = () => applyEffect(name);
+                }
+                
+                effectsContainer.appendChild(button);
+            });
+
+            document.querySelectorAll('.opt-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const group = e.target.dataset.group;
+                    document.querySelectorAll(`.opt-btn[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    textOverlaySettings[group] = e.target.dataset.value;
+                });
+            });
+        }
+
+        // Image & Paste
+        imageUpload.addEventListener('change', handleImageUpload);
+        pasteButton.addEventListener('click', handlePasteClick);
+        document.addEventListener('paste', (e) => {
+             if (!uploadSection.classList.contains('hidden') || !editorSection.classList.contains('hidden')) {
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                for (let i = 0; i < items.length; i++) {
+                    if (items[i].type.indexOf('image') !== -1) {
+                        const blob = items[i].getAsFile();
+                        processFile(blob);
+                        showToast("Image pasted!", "success");
+                        return; 
+                    }
+                }
+             }
+        });
+        
+        // Drag & Drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => uploadSection.addEventListener(e, (ev) => { ev.preventDefault(); ev.stopPropagation(); }));
+        ['dragenter', 'dragover'].forEach(e => {
+            uploadSection.addEventListener(e, highlightDropZone);
+        });
+        ['dragleave', 'drop'].forEach(e => {
+             uploadSection.addEventListener(e, unhighlightDropZone);
+        });
+        uploadSection.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            if (dt.files.length) processFile(dt.files[0]);
+        });
+
+        // Buttons
+        resetButton.addEventListener('click', () => {
+            resetApp();
+            imageUpload.click();
+        });
+        saveButton.addEventListener('click', saveImage);
+        copyButton.addEventListener('click', copyImageToClipboard);
+        effectsHeader.addEventListener('click', () => toggleEffects());
+        redoButton.addEventListener('click', () => { if (currentEffectName) applyEffect(currentEffectName); });
+        
+        // Use As Input Handler
+        useInputButton.addEventListener('click', () => {
+            if (!resultImage.src || resultImage.classList.contains('hidden')) return;
+            originalImage.src = resultImage.src;
+            const parts = resultImage.src.split(',');
+            base64ImageData = parts[1];
+            imageMimeType = parts[0].split(':')[1].split(';')[0] || 'image/png';
+            resultImage.src = '';
+            resultImage.classList.add('hidden');
+            resultPlaceholder.classList.remove('hidden');
+            saveButton.classList.add('hidden');
+            copyButton.classList.add('hidden');
+            useInputButton.classList.add('hidden');
+            toggleEffects(false);
+            currentEffectLabel.classList.add('hidden');
+            currentEffectLabel.textContent = '';
+            redoButton.classList.add('hidden');
+            currentEffectName = null;
+            showToast("Result set as new input!", "success");
+        });
+
+        // Modals
+        cancelComboBtn.addEventListener('click', hideComboModal);
+        applyComboBtn.addEventListener('click', () => { currentComboEffects.effect1 = comboSelect1.value; currentComboEffects.effect2 = comboSelect2.value; hideComboModal(); applyEffect('Custom Combo'); });
+        
+        cancelMiniatureBtn.addEventListener('click', hideMiniatureModal);
+        applyMiniatureBtn.addEventListener('click', () => { const city = miniatureCityInput.value.trim(); hideMiniatureModal(); applyEffect('Miniature', city ? `Show me miniatures of symbols of ${city} on a penny, in 3D, looking compelling and impressive.` : 'Show me miniatures of symbols of the subject depicted in this image on a penny, in 3D, looking compelling and impressive.'); });
+
+        cancelLogoBtn.addEventListener('click', hideLogoModal);
+        applyLogoBtn.addEventListener('click', () => {
+             const topic = logoTopicInput.value.trim(); const text = logoTextInput.value.trim(); hideLogoModal();
+             let prompt = "Create a vibrant, colorful, and compelling professional logo. Style: Vector art, clean lines, high quality. ";
+             if (!topic && !text) prompt += "Subject: the main subject of the reference image. Ensure it follows logo design best practices.";
+             else if (topic && !text) prompt += `Subject: ${topic}. Create a purely graphical logo icon with NO text.`;
+             else if (topic && text) prompt += `Subject: ${topic}. Incorporate text "${text}" artistically.`;
+             else if (!topic && text) prompt += `Subject: Creative typography based on text "${text}".`;
+             applyEffect('Logo Design 🎨', prompt);
+        });
+
+        cancelQuoteBtn.addEventListener('click', hideQuoteModal);
+        applyQuoteBtn.addEventListener('click', async () => {
+            let quote = quoteTextInput.value.trim(); let author = quoteAuthorInput.value.trim(); const useImage = quoteUseImageCheckbox.checked; hideQuoteModal();
+            let finalQuote = quote, finalAuthor = author;
+            setLoading(true);
+            try {
+                if (!quote) {
+                    if (author) { showToast(`Finding quote by ${author}...`, "info"); const d = await getQuoteByAuthor(author); finalQuote = d.quote; }
+                    else { if (!base64ImageData) throw new Error("No image"); showToast("Analyzing...", "info"); const d = await identifySubjectAndGetQuote(base64ImageData); finalQuote = d.quote; finalAuthor = d.author || ""; }
+                }
+                const textRefine = finalQuote + (finalAuthor ? ` - ${finalAuthor}` : "");
+                
+                let subj = finalAuthor || "a thoughtful person";
+                let instr = "";
+                
+                // STRICT CHECKBOX LOGIC: Only use image reference if explicitly checked
+                if (useImage && base64ImageData) { 
+                    subj = "the subject in the provided reference image"; 
+                    instr = " If multiple people, render all."; 
+                } 
+
+                // Updated prompt for separation
+                let prompt = `Create a composition with a clear, separated layout on a light brushed metal background. `;
+                prompt += `On one side, render a smaller, contained, highly detailed colored pencil portrait of ${subj}.${instr} `;
+                prompt += `On the OTHER side, in the empty negative space, write the quote: "${finalQuote}"`;
+                
+                if (finalAuthor) {
+                    prompt += ` - ${finalAuthor}`;
+                }
+                
+                prompt += `. Use a clean, elegant serif font. CRITICAL LAYOUT INSTRUCTION: The text and the portrait MUST NOT OVERLAP. Scale the face down to ensure it is distinct from the text block. The text should be sized smaller to fit comfortably without touching the portrait.`;
+                
+                applyEffect('Quote Effect 💬', prompt, useImage, textRefine);
+            } catch(e) { setLoading(false); showToast(e.message, "error"); }
+        });
+
+        cancelHandBtn.addEventListener('click', hideHandModal);
+        applyHandBtn.addEventListener('click', () => {
+            const artist = handArtistInput.value.trim() || "Caravaggio";
+            const useImage = handUseImageCheckbox.checked;
+            hideHandModal();
+            let prompt = `a painting a ${artist} style painting on the palm of an open hand with fingers pressed close together (no gaps). `;
+            if (useImage) prompt += `The palm painting depicts the subject of the attached reference image. `;
+            else prompt += `The palm painting depicts a famous work by ${artist}. `;
+            prompt += `CRITICAL INSTRUCTION: The painting must cover the ENTIRE visible inner surface of the hand (palm AND fingers). Since the fingers are held together, treat the whole hand as a single continuous canvas. Paint seamlessly across the fingers. The image must look like detailed body art or a tattoo on the skin, following the natural contours and wrinkles. Maximize the size to fill the hand completely. The painting is very detailed, photo realistic with soft glow. Close up, angled perspective dominating the image.`;
+            applyEffect('Hand Painting ✋', prompt, useImage);
+        });
+
+        cancelFontBtn.addEventListener('click', hideFontModal);
+        applyFontBtn.addEventListener('click', () => {
+             const text = fontTextInput.value.trim();
+             const useMask = fontUseMaskCheckbox.checked;
+             if (!text) { showToast("Please enter some text.", "error"); return; }
+             hideFontModal();
+             applyEffect('Font Effect 🅰️', text, useMask);
+        });
+        
+        cancelQrBtn.addEventListener('click', hideQrModal);
+        applyQrBtn.addEventListener('click', () => {
+             const url = qrDataInput.value.trim();
+             const text = qrTextInput.value.trim();
+             const useImg = qrUseImageCheckbox.checked;
+             hideQrModal();
+             // Pass combined data to be parsed by applyEffect
+             applyEffect('QR Code 📱', `${url}|${text}|${useImg}`);
+        });
+        
+        cancelAutoBtn.addEventListener('click', hideAutoModal);
+        applyAutoBtn.addEventListener('click', runAutoLoop);
+        stopAutoBtn.addEventListener('click', () => { isAutoFxRunning = false; showToast("Stopping loop...", "info"); });
+
+        cancelPromptBtn.addEventListener('click', hidePromptModal);
+        applyPromptBtn.addEventListener('click', () => { const p = customPromptInput.value.trim(); if(p) { hidePromptModal(); applyEffect('Custom Prompt ✨', p, useImageCheckbox.checked); } });
+        
+        cancelOverlayBtn.addEventListener('click', hideTextOverlayModal);
+        applyOverlayBtn.addEventListener('click', () => { hideTextOverlayModal(); applyEffect('Text Overlay 📝'); });
+
+        initialize();
+
+    </script>
+</body>
+</html>

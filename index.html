@@ -13,14 +13,18 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background-color: #0f172a;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.15) 0px, transparent 50%),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
             min-height: 100vh;
             color: #fff;
         }
 
         .header {
-            background: rgba(0,0,0,0.3);
-            padding: 15px 30px;
+            background: rgba(0,0,0,0.4);
+            padding: 12px 20px;
             display: flex;
             align-items: center;
             gap: 15px;
@@ -28,7 +32,7 @@
         }
 
         .header h1 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
             background: linear-gradient(90deg, #f97316, #fb923c);
             -webkit-background-clip: text;
@@ -37,67 +41,354 @@
 
         .header .subtitle {
             color: #888;
-            font-size: 14px;
+            font-size: 13px;
+        }
+
+        .settings-btn {
+            margin-left: auto;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #888;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .settings-btn:hover {
+            border-color: #f97316;
+            color: #f97316;
         }
 
         .main-container {
             display: flex;
-            height: calc(100vh - 70px);
+            height: calc(100vh - 52px);
         }
 
         /* Effects Panel */
         .effects-panel {
-            width: 280px;
-            background: rgba(0,0,0,0.2);
-            padding: 20px;
-            overflow-y: auto;
+            width: 420px;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
             border-right: 1px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
         }
 
-        .effects-panel h2 {
-            font-size: 14px;
-            color: #888;
-            margin-bottom: 15px;
+        /* Power Tools Row - Glassmorphic */
+        .power-tools-row {
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            gap: 8px;
+        }
+
+        .power-btn {
+            flex: 1;
+            padding: 12px 10px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.2);
+            position: relative;
+            overflow: hidden;
         }
 
+        .power-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.15), transparent);
+            pointer-events: none;
+        }
+
+        .power-btn.auto-fx {
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.7), rgba(185, 28, 28, 0.5));
+            color: #fecaca;
+            border-color: rgba(248, 113, 113, 0.4);
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .power-btn.auto-fx:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.8), rgba(220, 38, 38, 0.6));
+            box-shadow: 0 6px 25px rgba(220, 38, 38, 0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .power-btn.combo {
+            background: linear-gradient(135deg, rgba(124, 58, 237, 0.7), rgba(109, 40, 217, 0.5));
+            color: #ddd6fe;
+            border-color: rgba(167, 139, 250, 0.4);
+            box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .power-btn.combo:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(124, 58, 237, 0.6));
+            box-shadow: 0 6px 25px rgba(124, 58, 237, 0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .power-btn.custom {
+            background: linear-gradient(135deg, rgba(8, 145, 178, 0.7), rgba(14, 116, 144, 0.5));
+            color: #a5f3fc;
+            border-color: rgba(34, 211, 238, 0.4);
+            box-shadow: 0 4px 15px rgba(8, 145, 178, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .power-btn.custom:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.8), rgba(8, 145, 178, 0.6));
+            box-shadow: 0 6px 25px rgba(8, 145, 178, 0.5), inset 0 1px 0 rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        .power-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Search Box */
+        .search-container {
+            padding: 12px;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px 14px 10px 38px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(30, 41, 59, 0.9);
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .search-box:focus {
+            border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+        }
+
+        .search-box::placeholder {
+            color: #64748b;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        /* Filter Chips - Vibrant Glassmorphic */
+        .filter-chips-container {
+            padding: 12px;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .filter-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .filter-chip {
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Category Chip Colors - Vibrant */
+        .filter-chip[data-category="all"] {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+        }
+        .filter-chip[data-category="all"].active,
+        .filter-chip[data-category="all"]:hover {
+            background: rgba(255,255,255,0.25);
+            border-color: #fff;
+            box-shadow: 0 4px 15px rgba(255,255,255,0.2);
+        }
+
+        .filter-chip[data-category="drawing"] {
+            background: rgba(59,130,246,0.2);
+            border: 1px solid rgba(96,165,250,0.5);
+            color: #60a5fa;
+        }
+        .filter-chip[data-category="drawing"].active,
+        .filter-chip[data-category="drawing"]:hover {
+            background: rgba(59,130,246,0.4);
+            border-color: #60a5fa;
+            box-shadow: 0 4px 15px rgba(59,130,246,0.4);
+        }
+
+        .filter-chip[data-category="artistic"] {
+            background: rgba(168,85,247,0.2);
+            border: 1px solid rgba(192,132,252,0.5);
+            color: #c084fc;
+        }
+        .filter-chip[data-category="artistic"].active,
+        .filter-chip[data-category="artistic"]:hover {
+            background: rgba(168,85,247,0.4);
+            border-color: #c084fc;
+            box-shadow: 0 4px 15px rgba(168,85,247,0.4);
+        }
+
+        .filter-chip[data-category="materials"] {
+            background: rgba(245,158,11,0.2);
+            border: 1px solid rgba(251,191,36,0.5);
+            color: #fbbf24;
+        }
+        .filter-chip[data-category="materials"].active,
+        .filter-chip[data-category="materials"]:hover {
+            background: rgba(245,158,11,0.4);
+            border-color: #fbbf24;
+            box-shadow: 0 4px 15px rgba(245,158,11,0.4);
+        }
+
+        .filter-chip[data-category="backgrounds"] {
+            background: rgba(34,197,94,0.2);
+            border: 1px solid rgba(74,222,128,0.5);
+            color: #4ade80;
+        }
+        .filter-chip[data-category="backgrounds"].active,
+        .filter-chip[data-category="backgrounds"]:hover {
+            background: rgba(34,197,94,0.4);
+            border-color: #4ade80;
+            box-shadow: 0 4px 15px rgba(34,197,94,0.4);
+        }
+
+        .filter-chip[data-category="filters"] {
+            background: rgba(148,163,184,0.2);
+            border: 1px solid rgba(203,213,225,0.5);
+            color: #cbd5e1;
+        }
+        .filter-chip[data-category="filters"].active,
+        .filter-chip[data-category="filters"]:hover {
+            background: rgba(148,163,184,0.4);
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 15px rgba(148,163,184,0.3);
+        }
+
+        .filter-chip[data-category="tools"] {
+            background: rgba(236,72,153,0.2);
+            border: 1px solid rgba(244,114,182,0.5);
+            color: #f472b6;
+        }
+        .filter-chip[data-category="tools"].active,
+        .filter-chip[data-category="tools"]:hover {
+            background: rgba(236,72,153,0.4);
+            border-color: #f472b6;
+            box-shadow: 0 4px 15px rgba(236,72,153,0.4);
+        }
+
+        .filter-chip.active {
+            transform: scale(1.05);
+        }
+
+        /* Effects Grid - 2 Columns */
+        .effects-grid-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+            background: transparent;
+        }
+
+        .effects-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        /* Effect Buttons - Solid with colored text */
         .effect-btn {
             width: 100%;
-            padding: 12px 16px;
-            margin-bottom: 8px;
-            background: rgba(255,255,255,0.05);
+            padding: 11px 12px;
+            background: #1e293b;
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px;
-            color: #fff;
-            font-size: 14px;
+            font-size: 12px;
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
             text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .effect-btn:hover:not(:disabled) {
-            background: rgba(249, 115, 22, 0.2);
-            border-color: #f97316;
+            background: #334155;
+            border-color: rgba(255,255,255,0.2);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .effect-btn:disabled {
-            opacity: 0.4;
+            opacity: 0.35;
             cursor: not-allowed;
+        }
+
+        .effect-btn.hidden {
+            display: none;
+        }
+
+        /* Category text colors */
+        .effect-btn[data-category="drawing"] { color: #60a5fa; }
+        .effect-btn[data-category="artistic"] { color: #c084fc; }
+        .effect-btn[data-category="materials"] { color: #fbbf24; }
+        .effect-btn[data-category="backgrounds"] { color: #4ade80; }
+        .effect-btn[data-category="filters"] { color: #cbd5e1; }
+        .effect-btn[data-category="tools"] { color: #f472b6; }
+
+        .no-results {
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+            font-size: 13px;
+            grid-column: 1 / -1;
         }
 
         /* Image Display Area */
         .image-area {
             flex: 1;
-            padding: 30px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 15px;
+            min-width: 0;
         }
 
         .images-row {
             display: flex;
-            gap: 30px;
+            gap: 20px;
             flex: 1;
             min-height: 0;
         }
@@ -106,18 +397,20 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: rgba(0,0,0,0.2);
+            background: rgba(0,0,0,0.3);
             border-radius: 12px;
             overflow: hidden;
             border: 1px solid rgba(255,255,255,0.1);
+            min-width: 0;
         }
 
         .image-box-header {
-            padding: 12px 16px;
-            background: rgba(0,0,0,0.2);
+            padding: 10px 14px;
+            background: rgba(0,0,0,0.3);
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
             border-bottom: 1px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
         }
 
         .image-container {
@@ -125,7 +418,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: 15px;
             position: relative;
             min-height: 0;
         }
@@ -138,31 +431,51 @@
         }
 
         .placeholder {
-            color: #666;
+            color: #475569;
             text-align: center;
-            padding: 40px;
+            padding: 30px;
         }
 
         .placeholder-icon {
-            font-size: 48px;
-            margin-bottom: 10px;
+            font-size: 40px;
+            margin-bottom: 8px;
+        }
+
+        .placeholder p {
+            font-size: 13px;
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: #f97316;
+            background: rgba(249, 115, 22, 0.1);
         }
 
         /* Loading Overlay */
         .loading-overlay {
             position: absolute;
             inset: 0;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 15px;
+            gap: 12px;
         }
 
         .spinner {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border: 3px solid rgba(255,255,255,0.2);
             border-top-color: #f97316;
             border-radius: 50%;
@@ -177,42 +490,78 @@
             display: none !important;
         }
 
-        /* Action Buttons */
+        /* Action Buttons - Glassmorphic */
         .actions-row {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             justify-content: center;
-            padding: 10px 0;
+            padding: 8px 0;
+            flex-shrink: 0;
         }
 
         .action-btn {
             padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 10px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
-            border: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent);
+            pointer-events: none;
         }
 
         .action-btn.primary {
-            background: linear-gradient(135deg, #f97316, #ea580c);
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.8), rgba(234, 88, 12, 0.6));
             color: #fff;
+            border: 1px solid rgba(251, 146, 60, 0.5);
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
         }
 
         .action-btn.primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(251, 146, 60, 0.9), rgba(249, 115, 22, 0.7));
             transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(249, 115, 22, 0.4);
+            box-shadow: 0 6px 25px rgba(249, 115, 22, 0.5), inset 0 1px 0 rgba(255,255,255,0.3);
         }
 
         .action-btn.secondary {
-            background: rgba(255,255,255,0.1);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(51, 65, 85, 0.7);
+            color: #e2e8f0;
+            border: 1px solid rgba(255,255,255,0.15);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.1);
         }
 
         .action-btn.secondary:hover:not(:disabled) {
-            background: rgba(255,255,255,0.15);
+            background: rgba(71, 85, 105, 0.8);
+            border-color: rgba(255,255,255,0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+        }
+
+        /* Blue "Do That Again" button - Glassmorphic */
+        .action-btn.redo {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(37, 99, 235, 0.6));
+            color: #fff;
+            border: 1px solid rgba(96, 165, 250, 0.5);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .action-btn.redo:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(96, 165, 250, 0.9), rgba(59, 130, 246, 0.7));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(59, 130, 246, 0.5), inset 0 1px 0 rgba(255,255,255,0.3);
         }
 
         .action-btn:disabled {
@@ -221,102 +570,112 @@
             transform: none !important;
         }
 
-        /* API Key Modal */
+        /* Modals */
         .modal-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            backdrop-filter: blur(4px);
         }
 
         .modal {
-            background: #1e293b;
-            padding: 30px;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+            padding: 25px;
             border-radius: 16px;
-            max-width: 450px;
+            max-width: 420px;
             width: 90%;
             border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
         }
 
         .modal h2 {
-            margin-bottom: 15px;
-            font-size: 20px;
+            margin-bottom: 12px;
+            font-size: 18px;
+            color: #f1f5f9;
         }
 
         .modal p {
             color: #94a3b8;
-            margin-bottom: 20px;
-            font-size: 14px;
+            margin-bottom: 18px;
+            font-size: 13px;
             line-height: 1.5;
         }
 
-        .modal input {
+        .modal input, .modal textarea, .modal select {
             width: 100%;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-radius: 8px;
             border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(0,0,0,0.3);
+            background: rgba(15, 23, 42, 0.8);
             color: #fff;
-            font-size: 14px;
-            margin-bottom: 20px;
+            font-size: 13px;
+            margin-bottom: 12px;
+            font-family: inherit;
         }
 
-        .modal input:focus {
+        .modal textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal input:focus, .modal textarea:focus, .modal select:focus {
             outline: none;
             border-color: #f97316;
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.2);
+        }
+
+        .modal label {
+            display: block;
+            font-size: 12px;
+            color: #94a3b8;
+            margin-bottom: 6px;
         }
 
         .modal-actions {
             display: flex;
+            gap: 10px;
             justify-content: flex-end;
+            margin-top: 18px;
         }
 
-        /* Drop Zone */
-        .drop-zone {
-            border: 2px dashed rgba(255,255,255,0.2);
-            border-radius: 8px;
-            padding: 40px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.2s;
+        .checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
         }
 
-        .drop-zone:hover, .drop-zone.drag-over {
-            border-color: #f97316;
-            background: rgba(249, 115, 22, 0.1);
+        .checkbox-row input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            accent-color: #f97316;
         }
 
-        .drop-zone input {
-            display: none;
-        }
-
-        /* Settings button */
-        .settings-btn {
-            margin-left: auto;
-            background: transparent;
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #888;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
+        .checkbox-row label {
+            margin: 0;
+            color: #cbd5e1;
             font-size: 13px;
         }
 
-        .settings-btn:hover {
-            border-color: #f97316;
-            color: #f97316;
+        #fileInput {
+            display: none;
         }
     </style>
 </head>
 <body>
+    <!-- Persistent hidden file input -->
+    <input type="file" id="fileInput" accept="image/*">
+
     <!-- API Key Modal -->
     <div id="apiKeyModal" class="modal-overlay hidden">
         <div class="modal">
-            <h2>🔑 Enter API Key</h2>
-            <p>Enter your Google Gemini API key to use PCS Fx. Your key is stored locally in your browser and never sent anywhere except to Google's API.</p>
+            <h2>Enter API Key</h2>
+            <p>Enter your Google Gemini API key to use PCS Fx. Your key is stored locally in your browser.</p>
             <input type="password" id="apiKeyInput" placeholder="Paste your API key here...">
             <div class="modal-actions">
                 <button class="action-btn primary" onclick="saveApiKey()">Save & Continue</button>
@@ -324,17 +683,239 @@
         </div>
     </div>
 
+    <!-- Font Effect Modal -->
+    <div id="fontModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h2>Font Effect</h2>
+            <p>Create stylized text using the image or AI creativity.</p>
+            <label>Text to Display:</label>
+            <textarea id="fontTextInput" placeholder="ENTER TEXT" style="text-align: center; font-weight: bold;"></textarea>
+            <div class="checkbox-row">
+                <input type="checkbox" id="fontUseMask">
+                <label for="fontUseMask">Use image as text fill (mask mode)</label>
+            </div>
+            <div class="modal-actions">
+                <button class="action-btn secondary" onclick="closeFontModal()">Cancel</button>
+                <button class="action-btn primary" onclick="applyFontEffect()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Prompt Modal -->
+    <div id="promptModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h2>Custom Prompt</h2>
+            <p>Describe how you want to transform the image.</p>
+            <label>Your Prompt:</label>
+            <textarea id="customPromptInput" placeholder="e.g. Turn this into a cyberpunk scene with neon lights..."></textarea>
+            <div class="checkbox-row">
+                <input type="checkbox" id="useImageRef" checked>
+                <label for="useImageRef">Use original image as reference</label>
+            </div>
+            <div class="modal-actions">
+                <button class="action-btn secondary" onclick="closePromptModal()">Cancel</button>
+                <button class="action-btn primary" onclick="applyCustomPrompt()">Generate</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hand Painting Modal -->
+    <div id="handModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h2>Hand Painting Effect</h2>
+            <p>Display a painting on the palm of an open hand.</p>
+            <label>Artist Style:</label>
+            <input type="text" id="handArtistInput" placeholder="e.g. Caravaggio (leave blank for random)">
+            <div class="checkbox-row">
+                <input type="checkbox" id="handUseImage" checked>
+                <label for="handUseImage">Paint uploaded image on palm</label>
+            </div>
+            <div class="modal-actions">
+                <button class="action-btn secondary" onclick="closeHandModal()">Cancel</button>
+                <button class="action-btn primary" onclick="applyHandEffect()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logo Modal -->
+    <div id="logoModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h2>Logo Design</h2>
+            <p>Create a professional logo based on your inputs.</p>
+            <label>Logo Topic (optional):</label>
+            <input type="text" id="logoTopicInput" placeholder="e.g. Coffee Shop, Cyber Security">
+            <label>Logo Text (optional):</label>
+            <input type="text" id="logoTextInput" placeholder="e.g. Brand Name">
+            <div class="modal-actions">
+                <button class="action-btn secondary" onclick="closeLogoModal()">Cancel</button>
+                <button class="action-btn primary" onclick="applyLogoEffect()">Design</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quote Modal -->
+    <div id="quoteModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h2>Quote Effect</h2>
+            <p>Generate a composition with a pencil sketch and a quote.</p>
+            <label>Quote Text (leave blank for AI to choose):</label>
+            <textarea id="quoteTextInput" placeholder="e.g. Imagination is more important than knowledge."></textarea>
+            <label>Author (optional):</label>
+            <input type="text" id="quoteAuthorInput" placeholder="e.g. Albert Einstein">
+            <div class="checkbox-row">
+                <input type="checkbox" id="quoteUseImage" checked>
+                <label for="quoteUseImage">Sketch uploaded image (uncheck to sketch author)</label>
+            </div>
+            <div class="modal-actions">
+                <button class="action-btn secondary" onclick="closeQuoteModal()">Cancel</button>
+                <button class="action-btn primary" onclick="applyQuoteEffect()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Code Modal -->
+    <div id="qrModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h2>QR Code Generator</h2>
+            <p>Generate a stylish QR code.</p>
+            <label>URL or Text Data:</label>
+            <input type="text" id="qrDataInput" placeholder="https://example.com">
+            <label>Center Text (max 5 chars, optional):</label>
+            <input type="text" id="qrTextInput" maxlength="5" placeholder="LOGO" style="text-transform: uppercase;">
+            <div class="checkbox-row">
+                <input type="checkbox" id="qrUseImage">
+                <label for="qrUseImage">Use uploaded image as center logo</label>
+            </div>
+            <div class="modal-actions">
+                <button class="action-btn secondary" onclick="closeQrModal()">Cancel</button>
+                <button class="action-btn primary" onclick="applyQrEffect()">Generate</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Text Overlay Modal -->
+    <div id="textOverlayModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h2>Text Overlay</h2>
+            <p>Add stylish text overlay to your image.</p>
+            <label>Caption:</label>
+            <textarea id="textOverlayInput" placeholder="TYPE YOUR TEXT HERE"></textarea>
+            <label>Position:</label>
+            <select id="textPosition">
+                <option value="bottom-center">Bottom Center</option>
+                <option value="top-center">Top Center</option>
+                <option value="middle-center">Middle Center</option>
+                <option value="bottom-left">Bottom Left</option>
+                <option value="bottom-right">Bottom Right</option>
+            </select>
+            <label>Style:</label>
+            <select id="textStyle">
+                <option value="dark">Dark Glass</option>
+                <option value="light">Light Glass</option>
+            </select>
+            <div class="modal-actions">
+                <button class="action-btn secondary" onclick="closeTextOverlayModal()">Cancel</button>
+                <button class="action-btn primary" onclick="applyTextOverlay()">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Miniature Modal -->
+    <div id="miniatureModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h2>Miniature Effect</h2>
+            <p>Create tiny 3D miniatures on a penny.</p>
+            <label>City Name (optional - leave blank to use image subject):</label>
+            <input type="text" id="miniatureCityInput" placeholder="e.g. Paris, Tokyo, New York">
+            <div class="modal-actions">
+                <button class="action-btn secondary" onclick="closeMiniatureModal()">Cancel</button>
+                <button class="action-btn primary" onclick="applyMiniatureEffect()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Combo Modal -->
+    <div id="comboModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h2>Custom Combo</h2>
+            <p>Chain two effects together.</p>
+            <label>First Effect:</label>
+            <select id="comboSelect1"></select>
+            <label>Second Effect:</label>
+            <select id="comboSelect2"></select>
+            <div class="modal-actions">
+                <button class="action-btn secondary" onclick="closeComboModal()">Cancel</button>
+                <button class="action-btn primary" onclick="applyComboEffect()">Apply Combo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto Fx Modal -->
+    <div id="autoModal" class="modal-overlay hidden">
+        <div class="modal">
+            <h2>Auto Fx</h2>
+            <p>Automatically chain effects.</p>
+            <label>Effect to Loop:</label>
+            <select id="autoEffectSelect">
+                <option value="random">Random</option>
+            </select>
+            <label>Iterations (2-20):</label>
+            <input type="number" id="autoIterations" min="2" max="20" value="5">
+            <div class="checkbox-row">
+                <input type="checkbox" id="autoSwap" checked>
+                <label for="autoSwap">Evolve on screen (each result becomes next input)</label>
+            </div>
+            <div class="modal-actions">
+                <button class="action-btn secondary" onclick="closeAutoModal()">Cancel</button>
+                <button class="action-btn primary" onclick="runAutoFx()">Start</button>
+            </div>
+        </div>
+    </div>
+
     <header class="header">
-        <h1>🎨 PCS Fx</h1>
+        <h1>PCS Fx</h1>
         <span class="subtitle">AI Image Effects</span>
-        <button class="settings-btn" onclick="showApiKeyModal()">⚙️ API Key</button>
+        <button class="settings-btn" onclick="showApiKeyModal()">API Key</button>
     </header>
 
     <div class="main-container">
         <!-- Effects Panel -->
         <div class="effects-panel">
-            <h2>Choose an Effect</h2>
-            <div id="effectButtons"></div>
+            <!-- Power Tools Row -->
+            <div class="power-tools-row">
+                <button class="power-btn auto-fx" id="powerAutoFx" disabled onclick="showAutoModal()">⚡ Auto Fx</button>
+                <button class="power-btn combo" id="powerCombo" disabled onclick="showComboModal()">🔗 Combo</button>
+                <button class="power-btn custom" id="powerCustom" disabled onclick="showPromptModal()">✨ Custom</button>
+            </div>
+
+            <!-- Search Box -->
+            <div class="search-container">
+                <div class="search-wrapper">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" class="search-box" id="effectSearch" placeholder="Search effects...">
+                </div>
+            </div>
+
+            <!-- Filter Chips -->
+            <div class="filter-chips-container">
+                <div class="filter-chips">
+                    <button class="filter-chip active" data-category="all">All</button>
+                    <button class="filter-chip" data-category="drawing">Drawing</button>
+                    <button class="filter-chip" data-category="artistic">Artistic</button>
+                    <button class="filter-chip" data-category="materials">Materials</button>
+                    <button class="filter-chip" data-category="backgrounds">Backgrounds</button>
+                    <button class="filter-chip" data-category="filters">Filters</button>
+                    <button class="filter-chip" data-category="tools">Tools</button>
+                </div>
+            </div>
+
+            <!-- Effects Grid -->
+            <div class="effects-grid-container">
+                <div class="effects-grid" id="effectsGrid">
+                    <!-- Effects will be generated by JavaScript -->
+                </div>
+                <div class="no-results hidden" id="noResults">No effects found</div>
+            </div>
         </div>
 
         <!-- Image Display Area -->
@@ -344,11 +925,10 @@
                 <div class="image-box">
                     <div class="image-box-header">Original</div>
                     <div class="image-container" id="originalContainer">
-                        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                        <div class="drop-zone" id="dropZone">
                             <div class="placeholder-icon">📷</div>
-                            <p>Click to select or drag & drop an image</p>
-                            <p style="font-size: 12px; color: #555; margin-top: 8px;">You can also paste from clipboard (Ctrl+V)</p>
-                            <input type="file" id="fileInput" accept="image/*">
+                            <p>Click to select or drag & drop</p>
+                            <p style="font-size: 11px; color: #475569; margin-top: 6px;">Ctrl+V to paste</p>
                         </div>
                     </div>
                 </div>
@@ -357,13 +937,14 @@
                 <div class="image-box">
                     <div class="image-box-header">Result</div>
                     <div class="image-container" id="resultContainer">
-                        <div class="placeholder">
+                        <div class="placeholder" id="resultPlaceholder">
                             <div class="placeholder-icon">✨</div>
                             <p>Select an effect to generate</p>
                         </div>
+                        <img id="resultImage" class="hidden" alt="Result">
                         <div class="loading-overlay hidden" id="loadingOverlay">
                             <div class="spinner"></div>
-                            <span>Generating...</span>
+                            <span style="font-size: 13px;">Generating...</span>
                         </div>
                     </div>
                 </div>
@@ -371,315 +952,866 @@
 
             <!-- Action Buttons -->
             <div class="actions-row">
-                <button class="action-btn secondary" onclick="loadNewImage()">📁 Load New Image</button>
-                <button class="action-btn secondary" id="swapBtn" onclick="swapImages()" disabled>🔄 Swap Result → Original</button>
-                <button class="action-btn primary" id="saveBtn" onclick="saveImage()" disabled>💾 Save Image</button>
+                <button class="action-btn secondary" onclick="loadNewImage()">Load New</button>
+                <button class="action-btn secondary" id="swapBtn" onclick="swapImages()" disabled>Swap</button>
+                <button class="action-btn redo" id="redoBtn" onclick="doThatAgain()" disabled>Do That Again</button>
+                <button class="action-btn primary" id="saveBtn" onclick="saveImage()" disabled>Save</button>
             </div>
         </div>
     </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     <script>
         // ============ CONFIGURATION ============
-        // Use gemini-2.5-flash-image (Nano Banana) - works on free tier
-        // For Nano Banana Pro, change to 'gemini-3-pro-image-preview' (requires paid plan)
         const API_MODEL = 'gemini-2.5-flash-image';
         const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${API_MODEL}:generateContent`;
 
-        // Effects definitions
+        const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+        // EFFECTS WITH CATEGORIES
         const EFFECTS = [
-            {
-                name: 'Pencil Sketch',
-                prompt: 'Transform this image into a detailed graphite pencil sketch.'
+            // === Drawing ===
+            { name: 'Pencil Sketch', category: 'drawing', prompt: 'Transform this image into a detailed graphite pencil sketch.' },
+            { name: 'Color Pencil', category: 'drawing', prompt: 'Transform this image into a detailed colored pencil drawing with visible strokes.' },
+            { name: 'Vibrant Color Pencil', category: 'drawing', prompt: 'Transform this image into a colored pencil drawing with intensely vivid, highly saturated colors on the main subject. Background should be more muted for contrast.' },
+            { 
+                name: 'Notebook Sketch', 
+                category: 'drawing',
+                prompt: () => {
+                    const paper = randomFrom(['lined notebook paper (with horizontal blue lines)', 'plain white sketch paper']);
+                    return `Transform this image into a realistic ballpoint pen sketch on ${paper}. Use blue ballpoint ink with visible cross-hatching and shading.`;
+                }
             },
-            {
-                name: 'Watercolor',
-                prompt: 'Transform this image using traditional wet-on-wet watercolor technique with soft pigment diffusion and natural color bleeding. Edges should be soft and organic, avoiding hard outlines except where the focal subject requires gentle definition. Apply layered translucent washes, gradually building depth on cold-press watercolor paper with subtle grain. Colors should be slightly desaturated, harmonious, and blended smoothly. Preserve the subject\'s essential form but simplify fine details into expressive brush shapes. Lighting should feel diffuse. Background should dissolve into loose, abstract washes. Overall aesthetic: elegant, calm, painterly, and timeless.'
+            { name: 'Color Chalk', category: 'drawing', prompt: 'Redraw this image as if it were a vibrant color chalk drawing on a dark pavement.' },
+            { name: 'B&W Chalk', category: 'drawing', prompt: 'Redraw this image as if it were a black and white chalk drawing on a blackboard.' },
+
+            // === Artistic ===
+            { name: 'Watercolor', category: 'artistic', prompt: 'Transform this image using traditional wet-on-wet watercolor technique with soft pigment diffusion and natural color bleeding. Edges should be soft and organic. Apply layered translucent washes on cold-press watercolor paper. Overall aesthetic: elegant, calm, painterly, and timeless.' },
+            { name: 'Surrealism', category: 'artistic', prompt: 'Transform this image into a Surrealist masterpiece with dreamlike logic, strange juxtapositions, and unexpected scale changes while maintaining photorealistic details.' },
+            { name: 'Abstract Art', category: 'artistic', prompt: 'Transform this image into an abstract composition. Deconstruct the subject into geometric shapes, sweeping lines, and splashes of color. Focus on emotional essence.' },
+            { name: 'Pop Art', category: 'artistic', prompt: 'Transform this image into vibrant Pop Art inspired by Warhol and Lichtenstein. Bold saturated colors, thick black outlines, and Ben-Day dots.' },
+            { name: 'Afremov Style', category: 'artistic', prompt: 'Transform this image to mimic the style of Leonid Afremov, using vibrant, bold colors and a palette knife texture.' },
+            { name: 'Picasso Style', category: 'artistic', prompt: 'Transform this image into Cubist style inspired by Picasso. Fragment into geometric shapes showing multiple viewpoints simultaneously.' },
+            { name: 'Dali Style', category: 'artistic', prompt: 'Reimagine this image in Salvador Dali\'s surrealism style with dreamlike, fluid, or melting qualities in a vast barren landscape with sharp eerie shadows.' },
+            { name: 'Nagel Style', category: 'artistic', prompt: 'Redraw in the 1980s Art Deco style of Patrick Nagel. Bold clean lines, flat planes of vibrant color with minimal shading.' },
+            { name: 'Palekh Style', category: 'artistic', prompt: 'Transform into traditional Russian Palekh miniature painting. Deep glossy black background with vibrant glowing tempera colors and intricate gold line work.' },
+            { name: 'Caricature', category: 'artistic', prompt: 'Exaggerate the main features in this photo to create a funny caricature drawing.' },
+            { name: 'Vibrant Line Art', category: 'artistic', prompt: 'Transform into geometric vector illustration in flat design style. Break down into simple angular shapes filled with solid vibrant colors, no gradients.' },
+            { name: 'Stipple Portrait', category: 'artistic', prompt: 'Transform into high-contrast monochrome minimalist illustration using dense, intricate pointillist or stippling patterns.' },
+
+            // === Materials ===
+            { name: 'Stone Sculpture', category: 'materials', prompt: 'Transform the subject into solid stone sculpture with visible chisel marks, micro-fractures, erosion, and weathering. Dramatic cinematic lighting. Museum-quality, photorealistic.' },
+            { 
+                name: 'Marble Sculpture', 
+                category: 'materials',
+                prompt: () => {
+                    const marble = randomFrom(['white Carrara', 'black', 'green Verde Antico', 'rose Rosa Portugal']);
+                    return `Transform into a photorealistic sculpture made from ${marble} marble with characteristic veining and subtle translucence.`;
+                }
             },
-            {
-                name: 'Pop Art',
-                prompt: 'Transform this image into a vibrant Pop Art style illustration inspired by Andy Warhol and Roy Lichtenstein. Use bold, saturated, high-contrast colors (primary reds, yellows, blues), thick black outlines, and comic-book style Ben-Day dots for shading. Simplify details into strong, flat graphical shapes to create a retro, mass-media aesthetic.'
+            { name: 'Gold Foil Emboss', category: 'materials', prompt: 'Transform into photorealistic gold foil embossing with raised 3D relief effect. Monochromatic metallic gold palette with warm highlights and deep shadows.' },
+            { name: 'Wood Engraving', category: 'materials', prompt: 'Transform into a photorealistic pyrography piece burned onto rustic wood. Monochrome sepia and charcoal tones with visible wood grain texture.' },
+            { 
+                name: 'Repoussé Effect', 
+                category: 'materials',
+                prompt: () => {
+                    const metal = randomFrom(['copper', 'bronze', 'silver', 'brass', 'pewter']);
+                    return `Transform into photorealistic repoussé metalwork crafted from ${metal} with hammered relief texture, tool marks, and appropriate patina.`;
+                }
             },
-            {
-                name: 'Stone Sculpture',
-                prompt: 'Transform the subject of this image so it appears to be masterfully carved into solid stone, as if sculpted by a world-class artisan. Preserve the subject\'s exact proportions, contours, and defining details with high fidelity. Material: Hyper-realistic stone surface with visible chisel marks, micro-fractures, erosion, and weathering. Natural imperfections like tiny cracks and worn edges. Matte finish. Lighting: Dramatic cinematic lighting, low-angle raking light to accentuate depth and relief. Soft ambient fill. Mood: Epic, timeless, museum-quality. Color: Natural stone palette (cool grays, warm limestone tones). Quality: Ultra-high resolution, photorealistic, no cartoon or painterly effects. Looks like a real stone sculpture photographed with a cinema camera.'
+            { name: 'Paper Art', category: 'materials', prompt: 'Transform into multi-layered paper cut-out illustration. 3D shadow box style with stacked layers of colored paper and deep drop shadows.' },
+            { name: 'Leaf Art', category: 'materials', prompt: 'Transform into a photorealistic leaf carving masterpiece. The subject is intricately carved into a large autumn leaf using negative space cutouts.' },
+
+            // === Backgrounds ===
+            { 
+                name: 'Surprise Background', 
+                category: 'backgrounds',
+                prompt: () => {
+                    const bg = randomFrom([
+                        'a futuristic sci-fi city with neon lights and high-tech architecture',
+                        'a beautiful vibrant garden filled with blooming flowers and soft sunlight',
+                        'a serene tropical beach at golden hour with palm trees',
+                        'a dramatic mountain peak overlooking a sea of clouds',
+                        'a modern minimalist photography studio with abstract geometric lighting',
+                        'a mystical enchanted forest with glowing fireflies',
+                        'a bustling city street at night with colorful bokeh lights'
+                    ]);
+                    return `Keep the main foreground elements exactly as they are. Replace the background with ${bg}. Blend realistically.`;
+                }
             },
-            {
-                name: 'Grayscale',
-                prompt: 'Apply a grayscale filter to this image.'
+            { name: 'Smart Background', category: 'backgrounds', prompt: 'Analyze the foreground elements and replace the background with a completely new high-quality setting that complements the subject\'s style. Keep foreground unchanged but blend realistically.' },
+            { 
+                name: 'Holiday Theme', 
+                category: 'backgrounds',
+                prompt: () => {
+                    const now = new Date();
+                    const month = now.getMonth();
+                    const day = now.getDate();
+                    let theme;
+                    if (month === 9 && day > 15) theme = 'a spooky Halloween scene with carved pumpkins, cobwebs, and moody orange/purple lighting';
+                    else if (month === 10 && day < 5) theme = 'a colorful Dia de los Muertos theme with marigolds and sugar skull decorations';
+                    else if (month === 10) theme = 'a warm cozy Thanksgiving setting with autumn leaves and festive rustic atmosphere';
+                    else if (month === 11) theme = randomFrom(['a festive Christmas scene with decorated tree and twinkling lights', 'a warm Hanukkah setting with glowing menorah', 'a magical Winter Wonderland with falling snow']);
+                    else if (month === 0) theme = 'a festive New Year celebration with fireworks and confetti';
+                    else if (month === 1 && day > 5 && day < 16) theme = 'a romantic Valentine\'s Day setting with soft pink/red florals and hearts';
+                    else if (month >= 4 && month <= 7) theme = 'a bright sunny summer beach scene with blue ocean and palm trees';
+                    else theme = 'a crisp autumn park scene with colorful falling leaves';
+                    return `Keep foreground elements exactly as they are. Replace background with ${theme}. Match lighting perfectly.`;
+                }
             },
-            {
-                name: 'Smart Background',
-                prompt: 'Analyze the main foreground elements (people, objects, logos, etc.) and their current environment. Replace the background with a completely new, high-quality setting that complements the subject\'s style. If the foreground is a person, consider themes that match their attire or vibe. If it is an object or logo, choose a clean, professional, or thematic background that highlights it effectively. Alternatively, upgrade the current location to a "parallel universe" version (e.g., a messy room becomes a luxury apartment). Keep the foreground elements visually unchanged but blend them realistically into the new background.'
-            }
+
+            // === Filters ===
+            { name: 'Grayscale', category: 'filters', prompt: 'Apply a grayscale filter to this image.' },
+            { 
+                name: 'Monochrome Tint', 
+                category: 'filters',
+                prompt: () => {
+                    const color = randomFrom(['Red', 'Blue', 'Green', 'Purple', 'Cyan', 'Sepia', 'Teal', 'Magenta', 'Gold']);
+                    return `Convert into a monochrome ${color}-tinted photograph using shades of ${color} instead of gray. Preserve all details.`;
+                }
+            },
+
+            // === Tools ===
+            { name: 'Hand Painting', category: 'tools', special: 'hand' },
+            { name: 'Font Effect', category: 'tools', special: 'font' },
+            { name: 'Logo Design', category: 'tools', special: 'logo' },
+            { name: 'Quote Effect', category: 'tools', special: 'quote' },
+            { name: 'QR Code', category: 'tools', special: 'qr' },
+            { name: 'Miniature', category: 'tools', special: 'miniature' },
+            { name: 'Sneaky Lines', category: 'tools', special: 'sneakylines' },
+            { name: 'Text Overlay', category: 'tools', special: 'textoverlay' }
         ];
 
         // ============ STATE ============
-        let originalImageData = null;  // Base64 data of original image
+        let originalImageData = null;
         let originalMimeType = null;
-        let resultImageData = null;    // Base64 data of result image
+        let resultImageData = null;
         let isProcessing = false;
         let saveCounter = 1;
+        let autoFxRunning = false;
+        let lastEffectIndex = null;
+        let lastEffectPrompt = null;
+        let activeCategory = 'all';
 
         // ============ INITIALIZATION ============
         document.addEventListener('DOMContentLoaded', () => {
             initEffectButtons();
             initDragDrop();
             initPasteHandler();
+            initFileInput();
+            initComboSelects();
+            initAutoSelect();
+            initFilterChips();
+            initSearch();
             checkApiKey();
         });
 
         function initEffectButtons() {
-            const container = document.getElementById('effectButtons');
+            const grid = document.getElementById('effectsGrid');
+            grid.innerHTML = '';
+
             EFFECTS.forEach((effect, index) => {
                 const btn = document.createElement('button');
                 btn.className = 'effect-btn';
                 btn.textContent = effect.name;
                 btn.disabled = true;
-                btn.onclick = () => applyEffect(index);
+                btn.title = effect.name;
+                btn.dataset.category = effect.category;
+                btn.dataset.index = index;
+                btn.onclick = () => handleEffectClick(index);
                 btn.id = `effect-${index}`;
-                container.appendChild(btn);
+                grid.appendChild(btn);
+            });
+        }
+
+        function initFilterChips() {
+            const chips = document.querySelectorAll('.filter-chip');
+            chips.forEach(chip => {
+                chip.addEventListener('click', () => {
+                    // Clear search when clicking chip
+                    document.getElementById('effectSearch').value = '';
+                    
+                    // Update active state
+                    chips.forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    
+                    // Filter effects
+                    activeCategory = chip.dataset.category;
+                    filterEffects();
+                });
+            });
+        }
+
+        function initSearch() {
+            const searchBox = document.getElementById('effectSearch');
+            searchBox.addEventListener('input', (e) => {
+                const query = e.target.value.toLowerCase().trim();
+                
+                // Reset chips to "All" when searching
+                if (query) {
+                    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                    document.querySelector('.filter-chip[data-category="all"]').classList.add('active');
+                    activeCategory = 'all';
+                }
+                
+                filterEffects(query);
+            });
+        }
+
+        function filterEffects(searchQuery = '') {
+            const buttons = document.querySelectorAll('.effect-btn');
+            let visibleCount = 0;
+
+            buttons.forEach(btn => {
+                const category = btn.dataset.category;
+                const name = btn.textContent.toLowerCase();
+                
+                const matchesCategory = activeCategory === 'all' || category === activeCategory;
+                const matchesSearch = !searchQuery || name.includes(searchQuery);
+                
+                if (matchesCategory && matchesSearch) {
+                    btn.classList.remove('hidden');
+                    visibleCount++;
+                } else {
+                    btn.classList.add('hidden');
+                }
+            });
+
+            // Show/hide no results message
+            document.getElementById('noResults').classList.toggle('hidden', visibleCount > 0);
+        }
+
+        function initComboSelects() {
+            const select1 = document.getElementById('comboSelect1');
+            const select2 = document.getElementById('comboSelect2');
+            EFFECTS.forEach((effect, index) => {
+                if (!effect.special) {
+                    const opt1 = document.createElement('option');
+                    opt1.value = index;
+                    opt1.textContent = effect.name;
+                    select1.appendChild(opt1);
+                    
+                    const opt2 = document.createElement('option');
+                    opt2.value = index;
+                    opt2.textContent = effect.name;
+                    select2.appendChild(opt2);
+                }
+            });
+            if (select2.options.length > 1) select2.selectedIndex = 1;
+        }
+
+        function initAutoSelect() {
+            const select = document.getElementById('autoEffectSelect');
+            EFFECTS.forEach((effect, index) => {
+                if (!effect.special) {
+                    const opt = document.createElement('option');
+                    opt.value = index;
+                    opt.textContent = effect.name;
+                    select.appendChild(opt);
+                }
+            });
+        }
+
+        function handleEffectClick(index) {
+            const effect = EFFECTS[index];
+            if (effect.special === 'font') showFontModal();
+            else if (effect.special === 'prompt') showPromptModal();
+            else if (effect.special === 'hand') showHandModal();
+            else if (effect.special === 'logo') showLogoModal();
+            else if (effect.special === 'quote') showQuoteModal();
+            else if (effect.special === 'qr') showQrModal();
+            else if (effect.special === 'textoverlay') showTextOverlayModal();
+            else if (effect.special === 'miniature') showMiniatureModal();
+            else if (effect.special === 'combo') showComboModal();
+            else if (effect.special === 'auto') showAutoModal();
+            else if (effect.special === 'sneakylines') applySneakyLines();
+            else applyEffect(index);
+        }
+
+        function initFileInput() {
+            document.getElementById('fileInput').addEventListener('change', (e) => {
+                if (e.target.files.length > 0) handleFile(e.target.files[0]);
+                e.target.value = '';
             });
         }
 
         function initDragDrop() {
             const dropZone = document.getElementById('dropZone');
-            const fileInput = document.getElementById('fileInput');
+            if (!dropZone) return;
 
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                });
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => {
+                dropZone.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); });
             });
-
-            ['dragenter', 'dragover'].forEach(eventName => {
-                dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'));
+            ['dragenter', 'dragover'].forEach(evt => {
+                dropZone.addEventListener(evt, () => dropZone.classList.add('drag-over'));
             });
-
-            ['dragleave', 'drop'].forEach(eventName => {
-                dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'));
+            ['dragleave', 'drop'].forEach(evt => {
+                dropZone.addEventListener(evt, () => dropZone.classList.remove('drag-over'));
             });
-
             dropZone.addEventListener('drop', (e) => {
-                const files = e.dataTransfer.files;
-                if (files.length > 0) handleFile(files[0]);
+                if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
             });
-
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) handleFile(e.target.files[0]);
-            });
+            dropZone.addEventListener('click', () => document.getElementById('fileInput').click());
         }
 
         function initPasteHandler() {
             document.addEventListener('paste', (e) => {
-                const items = e.clipboardData.items;
-                for (let item of items) {
+                for (let item of e.clipboardData.items) {
                     if (item.type.startsWith('image/')) {
-                        const file = item.getAsFile();
-                        handleFile(file);
+                        handleFile(item.getAsFile());
                         break;
                     }
                 }
             });
         }
 
-        // ============ API KEY MANAGEMENT ============
+        // ============ API KEY ============
         function checkApiKey() {
-            const key = localStorage.getItem('pcsfx_api_key');
-            if (!key) {
-                showApiKeyModal();
-            }
+            if (!localStorage.getItem('pcsfx_api_key')) showApiKeyModal();
         }
-
         function showApiKeyModal() {
             document.getElementById('apiKeyModal').classList.remove('hidden');
             document.getElementById('apiKeyInput').value = localStorage.getItem('pcsfx_api_key') || '';
         }
-
         function saveApiKey() {
             const key = document.getElementById('apiKeyInput').value.trim();
             if (key) {
                 localStorage.setItem('pcsfx_api_key', key);
                 document.getElementById('apiKeyModal').classList.add('hidden');
+            } else alert('Please enter a valid API key');
+        }
+        function getApiKey() { return localStorage.getItem('pcsfx_api_key'); }
+
+        // ============ MODAL FUNCTIONS ============
+        function showFontModal() { document.getElementById('fontModal').classList.remove('hidden'); }
+        function closeFontModal() { document.getElementById('fontModal').classList.add('hidden'); }
+        function showPromptModal() { document.getElementById('promptModal').classList.remove('hidden'); }
+        function closePromptModal() { document.getElementById('promptModal').classList.add('hidden'); }
+        function showHandModal() { document.getElementById('handModal').classList.remove('hidden'); }
+        function closeHandModal() { document.getElementById('handModal').classList.add('hidden'); }
+        function showLogoModal() { document.getElementById('logoModal').classList.remove('hidden'); }
+        function closeLogoModal() { document.getElementById('logoModal').classList.add('hidden'); }
+        function showQuoteModal() { document.getElementById('quoteModal').classList.remove('hidden'); }
+        function closeQuoteModal() { document.getElementById('quoteModal').classList.add('hidden'); }
+        function showQrModal() { document.getElementById('qrModal').classList.remove('hidden'); }
+        function closeQrModal() { document.getElementById('qrModal').classList.add('hidden'); }
+        function showTextOverlayModal() { document.getElementById('textOverlayModal').classList.remove('hidden'); }
+        function closeTextOverlayModal() { document.getElementById('textOverlayModal').classList.add('hidden'); }
+        function showMiniatureModal() { document.getElementById('miniatureModal').classList.remove('hidden'); }
+        function closeMiniatureModal() { document.getElementById('miniatureModal').classList.add('hidden'); }
+        function showComboModal() { document.getElementById('comboModal').classList.remove('hidden'); }
+        function closeComboModal() { document.getElementById('comboModal').classList.add('hidden'); }
+        function showAutoModal() { document.getElementById('autoModal').classList.remove('hidden'); }
+        function closeAutoModal() { document.getElementById('autoModal').classList.add('hidden'); }
+
+        // ============ SPECIAL EFFECT HANDLERS ============
+        function applyFontEffect() {
+            const text = document.getElementById('fontTextInput').value.trim();
+            const useMask = document.getElementById('fontUseMask').checked;
+            if (!text) { alert('Please enter some text'); return; }
+            closeFontModal();
+            
+            if (useMask && originalImageData) {
+                applyFontMaskEffect(text);
             } else {
-                alert('Please enter a valid API key');
+                const prompt = `Create artistic typography of "${text}". Style: unique, bold, illustrative. High resolution, centered on clean background.`;
+                lastEffectPrompt = { prompt, useImage: false };
+                applyEffectWithPrompt(prompt, false);
             }
         }
 
-        function getApiKey() {
-            return localStorage.getItem('pcsfx_api_key');
+        function applyFontMaskEffect(text) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.onload = () => {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                let fontSize = 300;
+                const maxW = canvas.width * 0.8;
+                const maxH = canvas.height * 0.8;
+                
+                ctx.textBaseline = 'middle';
+                ctx.textAlign = 'center';
+                
+                const lines = text.split('\n');
+                while (fontSize > 10) {
+                    ctx.font = `900 ${fontSize}px "Segoe UI", sans-serif`;
+                    let maxLineWidth = 0;
+                    lines.forEach(line => {
+                        const m = ctx.measureText(line);
+                        if (m.width > maxLineWidth) maxLineWidth = m.width;
+                    });
+                    const totalHeight = lines.length * (fontSize * 1.1);
+                    if (totalHeight < maxH && maxLineWidth < maxW) break;
+                    fontSize -= 5;
+                }
+                
+                ctx.fillStyle = 'white';
+                const lineHeight = fontSize * 1.1;
+                const totalBlockHeight = lines.length * lineHeight;
+                const startY = (canvas.height - totalBlockHeight) / 2 + (lineHeight / 2);
+                lines.forEach((line, i) => {
+                    ctx.fillText(line.toUpperCase(), canvas.width / 2, startY + (i * lineHeight));
+                });
+                
+                ctx.globalCompositeOperation = 'source-in';
+                ctx.drawImage(img, 0, 0);
+                
+                ctx.globalCompositeOperation = 'destination-over';
+                ctx.fillStyle = '#0f172a';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                displayResultImage(canvas.toDataURL('image/png').split(',')[1], 'image/png');
+            };
+            img.src = `data:${originalMimeType};base64,${originalImageData}`;
+        }
+
+        function applyCustomPrompt() {
+            const prompt = document.getElementById('customPromptInput').value.trim();
+            const useImage = document.getElementById('useImageRef').checked;
+            if (!prompt) { alert('Please enter a prompt'); return; }
+            closePromptModal();
+            lastEffectPrompt = { prompt, useImage };
+            applyEffectWithPrompt(prompt, useImage);
+        }
+
+        function applyHandEffect() {
+            const artist = document.getElementById('handArtistInput').value.trim() || 'Caravaggio';
+            const useImage = document.getElementById('handUseImage').checked;
+            closeHandModal();
+            let prompt = `A ${artist} style painting on the palm of an open hand with fingers pressed together. `;
+            prompt += useImage ? 'The palm painting depicts the subject of the attached image. ' : `The palm painting depicts a famous work by ${artist}. `;
+            prompt += 'The painting covers the entire inner surface. Photo realistic with soft glow. Close up, angled perspective.';
+            lastEffectPrompt = { prompt, useImage };
+            applyEffectWithPrompt(prompt, useImage);
+        }
+
+        function applyLogoEffect() {
+            const topic = document.getElementById('logoTopicInput').value.trim();
+            const text = document.getElementById('logoTextInput').value.trim();
+            closeLogoModal();
+            let prompt = 'Create a vibrant, colorful, compelling professional logo. Style: Vector art, clean lines. ';
+            if (!topic && !text) prompt += 'Subject: the main subject of the reference image.';
+            else if (topic && !text) prompt += `Subject: ${topic}. Create purely graphical logo with NO text.`;
+            else if (topic && text) prompt += `Subject: ${topic}. Incorporate text "${text}" artistically.`;
+            else prompt += `Subject: Creative typography based on "${text}".`;
+            lastEffectPrompt = { prompt, useImage: !topic && !text };
+            applyEffectWithPrompt(prompt, !topic && !text);
+        }
+
+        function applyQuoteEffect() {
+            const quote = document.getElementById('quoteTextInput').value.trim() || 'The only way to do great work is to love what you do.';
+            const author = document.getElementById('quoteAuthorInput').value.trim() || 'Steve Jobs';
+            const useImage = document.getElementById('quoteUseImage').checked;
+            closeQuoteModal();
+            const prompt = `Create a composition with colored pencil portrait and quote. On one side, render a detailed colored pencil portrait of ${useImage ? 'the subject in the image' : author}. On the other side, write: "${quote}" - ${author}. Use elegant serif font. Portrait and text must NOT overlap.`;
+            lastEffectPrompt = { prompt, useImage };
+            applyEffectWithPrompt(prompt, useImage);
+        }
+
+        function applyQrEffect() {
+            const url = document.getElementById('qrDataInput').value.trim() || 'https://example.com';
+            const centerText = document.getElementById('qrTextInput').value.trim().toUpperCase();
+            const useImage = document.getElementById('qrUseImage').checked;
+            closeQrModal();
+
+            const canvas = document.createElement('canvas');
+            const size = 1000;
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+
+            const hue = Math.floor(Math.random() * 360);
+            const fgColor = `hsl(${hue}, 100%, 25%)`;
+
+            const qr = new QRious({
+                element: document.createElement('canvas'),
+                value: url,
+                size: size,
+                level: 'H',
+                background: 'white',
+                foreground: fgColor
+            });
+            ctx.drawImage(qr.canvas, 0, 0);
+
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const centerSize = size * 0.22;
+
+            if (useImage && originalImageData) {
+                const logo = new Image();
+                logo.onload = () => {
+                    ctx.fillStyle = 'white';
+                    ctx.fillRect(centerX - centerSize/2 - 15, centerY - centerSize/2 - 15, centerSize + 30, centerSize + 30);
+                    ctx.drawImage(logo, centerX - centerSize/2, centerY - centerSize/2, centerSize, centerSize);
+                    displayResultImage(canvas.toDataURL('image/png').split(',')[1], 'image/png');
+                };
+                logo.src = `data:${originalMimeType};base64,${originalImageData}`;
+            } else if (centerText) {
+                const fontSize = size * 0.12;
+                ctx.font = `bold ${fontSize}px "Segoe UI", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const metrics = ctx.measureText(centerText);
+                const boxW = metrics.width + fontSize * 0.4;
+                const boxH = fontSize * 1.4;
+                ctx.fillStyle = 'white';
+                ctx.fillRect(centerX - boxW/2, centerY - boxH/2, boxW, boxH);
+                ctx.fillStyle = 'black';
+                ctx.fillText(centerText, centerX, centerY);
+                displayResultImage(canvas.toDataURL('image/png').split(',')[1], 'image/png');
+            } else {
+                displayResultImage(canvas.toDataURL('image/png').split(',')[1], 'image/png');
+            }
+        }
+
+        function applyTextOverlay() {
+            const text = document.getElementById('textOverlayInput').value.trim();
+            const position = document.getElementById('textPosition').value;
+            const style = document.getElementById('textStyle').value;
+            if (!text) { alert('Please enter text'); return; }
+            if (!originalImageData) { alert('Please load an image first'); return; }
+            closeTextOverlayModal();
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.onload = () => {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+
+                const fontSize = Math.max(24, canvas.width / 15);
+                const padding = fontSize * 0.8;
+                const lines = text.split('\n');
+                const lineHeight = fontSize * 1.3;
+                
+                ctx.font = `bold ${fontSize}px "Segoe UI", sans-serif`;
+                let maxLineWidth = 0;
+                lines.forEach(line => {
+                    const m = ctx.measureText(line);
+                    if (m.width > maxLineWidth) maxLineWidth = m.width;
+                });
+
+                const boxW = maxLineWidth + padding * 2;
+                const boxH = lines.length * lineHeight + padding * 2;
+
+                let boxX, boxY;
+                const margin = canvas.width * 0.05;
+                
+                if (position.includes('left')) boxX = margin;
+                else if (position.includes('right')) boxX = canvas.width - boxW - margin;
+                else boxX = (canvas.width - boxW) / 2;
+
+                if (position.includes('top')) boxY = margin;
+                else if (position.includes('bottom')) boxY = canvas.height - boxH - margin;
+                else boxY = (canvas.height - boxH) / 2;
+
+                ctx.save();
+                ctx.filter = 'blur(10px)';
+                ctx.drawImage(img, boxX, boxY, boxW, boxH, boxX, boxY, boxW, boxH);
+                ctx.filter = 'none';
+                ctx.fillStyle = style === 'light' ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.5)';
+                ctx.fillRect(boxX, boxY, boxW, boxH);
+                ctx.restore();
+
+                ctx.fillStyle = style === 'light' ? '#000' : '#fff';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                const startY = boxY + padding + lineHeight / 2;
+                lines.forEach((line, i) => {
+                    ctx.fillText(line, boxX + boxW / 2, startY + i * lineHeight);
+                });
+
+                displayResultImage(canvas.toDataURL('image/png').split(',')[1], 'image/png');
+            };
+            img.src = `data:${originalMimeType};base64,${originalImageData}`;
+        }
+
+        function applyMiniatureEffect() {
+            const city = document.getElementById('miniatureCityInput').value.trim();
+            closeMiniatureModal();
+            const prompt = city 
+                ? `Show miniatures of symbols of ${city} on a penny, in 3D, looking compelling and impressive.`
+                : 'Show miniatures of symbols of the subject depicted in this image on a penny, in 3D, looking compelling and impressive.';
+            lastEffectPrompt = { prompt, useImage: !city };
+            applyEffectWithPrompt(prompt, !city);
+        }
+
+        function applySneakyLines() {
+            if (!originalImageData) { alert('Please load an image first'); return; }
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.onload = () => {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCanvas.width = 50;
+                tempCanvas.height = 50;
+                tempCtx.drawImage(img, 0, 0, 50, 50);
+                const data = tempCtx.getImageData(0, 0, 50, 50).data;
+                const offset = Math.floor(Math.random() * (data.length / 4)) * 4;
+                const maskColor = `rgb(${data[offset]}, ${data[offset+1]}, ${data[offset+2]})`;
+                
+                ctx.fillStyle = maskColor;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.save();
+                ctx.beginPath();
+                const lineWidth = Math.max(10, canvas.width * 0.05);
+                for (let x = 0; x < canvas.width; x += lineWidth * 2) {
+                    ctx.rect(x, 0, lineWidth, canvas.height);
+                }
+                ctx.clip();
+                ctx.drawImage(img, 0, 0);
+                ctx.restore();
+                
+                displayResultImage(canvas.toDataURL('image/png').split(',')[1], 'image/png');
+            };
+            img.src = `data:${originalMimeType};base64,${originalImageData}`;
+        }
+
+        async function applyComboEffect() {
+            const idx1 = parseInt(document.getElementById('comboSelect1').value);
+            const idx2 = parseInt(document.getElementById('comboSelect2').value);
+            closeComboModal();
+            
+            if (!originalImageData) { alert('Please load an image first'); return; }
+            
+            isProcessing = true;
+            setLoading(true);
+            
+            try {
+                let prompt1 = EFFECTS[idx1].prompt;
+                if (typeof prompt1 === 'function') prompt1 = prompt1();
+                const result1 = await callApi(prompt1, originalImageData, originalMimeType);
+                if (!result1) throw new Error('First effect failed');
+                
+                let prompt2 = EFFECTS[idx2].prompt;
+                if (typeof prompt2 === 'function') prompt2 = prompt2();
+                const result2 = await callApi(prompt2, result1.data, result1.mimeType);
+                if (!result2) throw new Error('Second effect failed');
+                
+                displayResultImage(result2.data, result2.mimeType);
+            } catch (e) {
+                alert('Error: ' + e.message);
+            } finally {
+                isProcessing = false;
+                setLoading(false);
+            }
+        }
+
+        async function runAutoFx() {
+            const iterations = parseInt(document.getElementById('autoIterations').value) || 5;
+            const effectValue = document.getElementById('autoEffectSelect').value;
+            const evolve = document.getElementById('autoSwap').checked;
+            closeAutoModal();
+            
+            if (!originalImageData) { alert('Please load an image first'); return; }
+            if (iterations < 2 || iterations > 20) { alert('Iterations must be 2-20'); return; }
+            
+            autoFxRunning = true;
+            let currentData = originalImageData;
+            let currentMime = originalMimeType;
+            
+            const nonSpecialEffects = EFFECTS.map((e, i) => ({ ...e, index: i })).filter(e => !e.special);
+            
+            for (let i = 0; i < iterations && autoFxRunning; i++) {
+                setLoading(true);
+                document.querySelector('#loadingOverlay span').textContent = `Processing ${i + 1} of ${iterations}...`;
+                
+                let effectIdx;
+                if (effectValue === 'random') {
+                    effectIdx = nonSpecialEffects[Math.floor(Math.random() * nonSpecialEffects.length)].index;
+                } else {
+                    effectIdx = parseInt(effectValue);
+                }
+                
+                let prompt = EFFECTS[effectIdx].prompt;
+                if (typeof prompt === 'function') prompt = prompt();
+                
+                try {
+                    const result = await callApi(prompt, currentData, currentMime);
+                    if (result) {
+                        displayResultImage(result.data, result.mimeType);
+                        if (evolve) {
+                            currentData = result.data;
+                            currentMime = result.mimeType;
+                        }
+                    }
+                } catch (e) {
+                    console.error('Auto Fx error:', e);
+                }
+                
+                await new Promise(r => setTimeout(r, 500));
+            }
+            
+            autoFxRunning = false;
+            setLoading(false);
         }
 
         // ============ IMAGE HANDLING ============
         function handleFile(file) {
-            if (!file.type.startsWith('image/')) {
-                alert('Please select an image file');
-                return;
-            }
-
+            if (!file.type.startsWith('image/')) { alert('Please select an image file'); return; }
             const reader = new FileReader();
             reader.onload = (e) => {
-                const dataUrl = e.target.result;
                 originalMimeType = file.type;
-                originalImageData = dataUrl.split(',')[1]; // Remove data:image/xxx;base64, prefix
-                displayOriginalImage(dataUrl);
+                originalImageData = e.target.result.split(',')[1];
+                displayOriginalImage(e.target.result);
                 enableEffectButtons();
                 clearResult();
             };
+            reader.onerror = () => alert('Error reading file');
             reader.readAsDataURL(file);
         }
 
         function displayOriginalImage(dataUrl) {
-            const container = document.getElementById('originalContainer');
-            container.innerHTML = `<img src="${dataUrl}" alt="Original image">`;
-        }
-
-        function displayResultImage(base64Data, mimeType) {
-            const dataUrl = `data:${mimeType};base64,${base64Data}`;
-            const container = document.getElementById('resultContainer');
-            
-            // Keep the loading overlay element
-            container.innerHTML = `
-                <img src="${dataUrl}" alt="Result image">
-                <div class="loading-overlay hidden" id="loadingOverlay">
-                    <div class="spinner"></div>
-                    <span>Generating...</span>
-                </div>
-            `;
-            
-            resultImageData = base64Data;
-            document.getElementById('saveBtn').disabled = false;
-            document.getElementById('swapBtn').disabled = false;
+            document.getElementById('originalContainer').innerHTML = `<img src="${dataUrl}" alt="Original">`;
         }
 
         function clearResult() {
-            const container = document.getElementById('resultContainer');
-            container.innerHTML = `
-                <div class="placeholder">
-                    <div class="placeholder-icon">✨</div>
-                    <p>Select an effect to generate</p>
-                </div>
-                <div class="loading-overlay hidden" id="loadingOverlay">
-                    <div class="spinner"></div>
-                    <span>Generating...</span>
-                </div>
-            `;
+            document.getElementById('resultImage').classList.add('hidden');
+            document.getElementById('resultImage').src = '';
+            document.getElementById('resultPlaceholder').classList.remove('hidden');
             resultImageData = null;
             document.getElementById('saveBtn').disabled = true;
             document.getElementById('swapBtn').disabled = true;
+            document.getElementById('redoBtn').disabled = (lastEffectIndex === null && lastEffectPrompt === null);
         }
 
         function enableEffectButtons() {
-            EFFECTS.forEach((_, index) => {
-                document.getElementById(`effect-${index}`).disabled = false;
-            });
+            EFFECTS.forEach((_, i) => document.getElementById(`effect-${i}`).disabled = false);
+            document.getElementById('powerAutoFx').disabled = false;
+            document.getElementById('powerCombo').disabled = false;
+            document.getElementById('powerCustom').disabled = false;
         }
 
         function disableEffectButtons() {
-            EFFECTS.forEach((_, index) => {
-                document.getElementById(`effect-${index}`).disabled = true;
-            });
+            EFFECTS.forEach((_, i) => document.getElementById(`effect-${i}`).disabled = true);
+            document.getElementById('powerAutoFx').disabled = true;
+            document.getElementById('powerCombo').disabled = true;
+            document.getElementById('powerCustom').disabled = true;
         }
 
-        // ============ API INTERACTION ============
+        function setLoading(show) {
+            document.getElementById('loadingOverlay').classList.toggle('hidden', !show);
+            if (show) document.getElementById('resultPlaceholder').classList.add('hidden');
+            if (show) disableEffectButtons();
+            else if (originalImageData) enableEffectButtons();
+        }
+
+        // ============ API ============
         async function applyEffect(effectIndex) {
             if (isProcessing || !originalImageData) return;
+            let prompt = EFFECTS[effectIndex].prompt;
+            if (typeof prompt === 'function') prompt = prompt();
+            if (!prompt) return;
+            lastEffectIndex = effectIndex;
+            applyEffectWithPrompt(prompt, true, true);
+        }
 
+        async function applyEffectWithPrompt(prompt, useImage = true, fromStandardEffect = false) {
+            if (isProcessing) return;
             const apiKey = getApiKey();
-            if (!apiKey) {
-                showApiKeyModal();
-                return;
-            }
+            if (!apiKey) { showApiKeyModal(); return; }
+            if (useImage && !originalImageData) { alert('Please load an image first'); return; }
 
-            const effect = EFFECTS[effectIndex];
-            isProcessing = true;
+            if (!fromStandardEffect) {
+                lastEffectIndex = null;
+            }
+            lastEffectPrompt = { prompt, useImage };
             
-            // Show loading state
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            disableEffectButtons();
+            isProcessing = true;
+            setLoading(true);
 
             try {
-                const response = await fetch(`${API_URL}?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        contents: [{
-                            parts: [
-                                { text: effect.prompt },
-                                {
-                                    inline_data: {
-                                        mime_type: originalMimeType,
-                                        data: originalImageData
-                                    }
-                                }
-                            ]
-                        }],
-                        generationConfig: {
-                            responseModalities: ['TEXT', 'IMAGE']
-                        }
-                    })
-                });
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error?.message || `API Error: ${response.status}`);
-                }
-
-                const data = await response.json();
-                
-                // Find the image part in the response
-                let imageFound = false;
-                if (data.candidates && data.candidates[0]?.content?.parts) {
-                    for (const part of data.candidates[0].content.parts) {
-                        if (part.inlineData) {
-                            displayResultImage(part.inlineData.data, part.inlineData.mimeType);
-                            imageFound = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (!imageFound) {
-                    throw new Error('No image returned from API');
-                }
-
-            } catch (error) {
-                console.error('Effect error:', error);
-                alert(`Error: ${error.message}`);
-                clearResult();
+                const result = await callApi(prompt, useImage ? originalImageData : null, useImage ? originalMimeType : null);
+                if (result) displayResultImage(result.data, result.mimeType);
+                else throw new Error('No image returned');
+            } catch (e) {
+                console.error('Effect error:', e);
+                alert('Error: ' + e.message);
+                document.getElementById('resultPlaceholder').classList.remove('hidden');
             } finally {
                 isProcessing = false;
-                document.getElementById('loadingOverlay').classList.add('hidden');
-                if (originalImageData) enableEffectButtons();
+                setLoading(false);
             }
+        }
+
+        async function callApi(prompt, imageData, mimeType) {
+            const apiKey = getApiKey();
+            const parts = [{ text: prompt }];
+            if (imageData && mimeType) {
+                parts.push({ inline_data: { mime_type: mimeType, data: imageData } });
+            }
+            
+            const response = await fetch(`${API_URL}?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts }],
+                    generationConfig: { responseModalities: ['TEXT', 'IMAGE'] }
+                })
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error?.message || `API Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data.candidates?.[0]?.content?.parts) {
+                for (const part of data.candidates[0].content.parts) {
+                    if (part.inlineData) {
+                        return { data: part.inlineData.data, mimeType: part.inlineData.mimeType };
+                    }
+                }
+            }
+            return null;
+        }
+
+        function displayResultImage(base64Data, mimeType) {
+            const img = document.getElementById('resultImage');
+            img.src = `data:${mimeType};base64,${base64Data}`;
+            img.classList.remove('hidden');
+            document.getElementById('resultPlaceholder').classList.add('hidden');
+            resultImageData = base64Data;
+            document.getElementById('saveBtn').disabled = false;
+            document.getElementById('swapBtn').disabled = false;
+            document.getElementById('redoBtn').disabled = false;
         }
 
         // ============ ACTIONS ============
-        function loadNewImage() {
-            document.getElementById('fileInput').click();
+        function doThatAgain() {
+            if (lastEffectIndex !== null) {
+                applyEffect(lastEffectIndex);
+            } else if (lastEffectPrompt) {
+                applyEffectWithPrompt(lastEffectPrompt.prompt, lastEffectPrompt.useImage);
+            }
         }
 
+        function loadNewImage() { document.getElementById('fileInput').click(); }
+        
         function swapImages() {
             if (!resultImageData) return;
-            
             originalImageData = resultImageData;
-            originalMimeType = 'image/png'; // Result is typically PNG
+            originalMimeType = 'image/png';
             displayOriginalImage(`data:image/png;base64,${resultImageData}`);
             clearResult();
         }
 
         function saveImage() {
             if (!resultImageData) return;
-
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-            const filename = `pcsfx_${timestamp}_${String(saveCounter).padStart(3, '0')}.png`;
-            saveCounter++;
-
+            const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
             const link = document.createElement('a');
             link.href = `data:image/png;base64,${resultImageData}`;
-            link.download = filename;
+            link.download = `pcsfx_${ts}_${String(saveCounter++).padStart(3, '0')}.png`;
             link.click();
         }
     </script>
